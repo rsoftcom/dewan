@@ -1,0 +1,748 @@
+{
+  "project": "dewan",
+  "version": "1.0",
+  "createdAt": "2026-05-20",
+  "updatedAt": "2026-06-23",
+  "phase": "phase2",
+  "summary": "Fase 1 completa (19 módulos). Fase 2: SPEC-20 (WebSocket real-time) completado 2026-06-23. Pendientes: SPEC-21 (multi-tenant owner), SPEC-22 (performance). SPEC-18/SPEC-19 phase2 también resueltos con SPEC-20.",
+  "prisma": {
+    "initialized": true,
+    "schemaPath": "dewan-backend/prisma/schema.prisma"
+  },
+  "sharedModules": {
+    "prisma-service": "done",
+    "auth-guards": "done",
+    "tenant-interceptor": "done",
+    "pagination-dto": "done",
+    "audit-interceptor": "done",
+    "common-decorators": "done",
+    "websocket-gateway": "pending-phase2",
+    "websocket-service-frontend": "pending-phase2"
+  },
+  "buildOrder": [
+    {
+      "spec": "SPEC-01-auth",
+      "reason": "Foundation: JWT, guards, login flow"
+    },
+    {
+      "spec": "SPEC-03-tenants",
+      "reason": "Depends on: auth. Creates business context"
+    },
+    {
+      "spec": "SPEC-02-users",
+      "reason": "Depends on: auth, tenants. User CRUD"
+    },
+    {
+      "spec": "SPEC-04-units",
+      "reason": "No deps. Global data for products"
+    },
+    {
+      "spec": "SPEC-06-categories",
+      "reason": "No deps. Organizes products"
+    },
+    {
+      "spec": "SPEC-05-products",
+      "reason": "Depends on: units, categories. Core catalog"
+    },
+    {
+      "spec": "SPEC-10-cash-register",
+      "reason": "Independent. Required before payments"
+    },
+    {
+      "spec": "SPEC-11-movements",
+      "reason": "Depends on: cash-register"
+    },
+    {
+      "spec": "SPEC-12-customers",
+      "reason": "Independent. Required for delivery orders"
+    },
+    {
+      "spec": "SPEC-07-orders",
+      "reason": "Depends on: products, tables, customers, cash-register"
+    },
+    {
+      "spec": "SPEC-08-kitchen",
+      "reason": "Depends on: orders. WebSocket heavy"
+    },
+    {
+      "spec": "SPEC-09-payments",
+      "reason": "Depends on: orders, cash-register"
+    },
+    {
+      "spec": "SPEC-13-delivery",
+      "reason": "Depends on: orders, delivery-persons"
+    },
+    {
+      "spec": "SPEC-14-suppliers",
+      "reason": "Independent. Required for purchases"
+    },
+    {
+      "spec": "SPEC-15-purchases",
+      "reason": "Depends on: suppliers, products"
+    },
+    {
+      "spec": "SPEC-16-inventory",
+      "reason": "Depends on: products"
+    },
+    {
+      "spec": "SPEC-18-notifications",
+      "reason": "Depends on: WebSocket gateway"
+    },
+    {
+      "spec": "SPEC-19-audit-log",
+      "reason": "Cross-cutting. Uses interceptor"
+    },
+    {
+      "spec": "SPEC-17-reports",
+      "reason": "Last. Reads from all other modules"
+    }
+  ],
+  "modules": {
+    "SPEC-01-auth": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 1,
+      "dependencies": [],
+      "completedAt": "2026-05-22",
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/main.ts",
+        "dewan-backend/app.module.ts",
+        "dewan-backend/common/common.module.ts",
+        "dewan-backend/common/services/prisma.service.ts",
+        "dewan-backend/common/services/audit-log.service.ts",
+        "dewan-backend/common/dto/pagination.dto.ts",
+        "dewan-backend/common/decorators/roles.decorator.ts",
+        "dewan-backend/common/decorators/current-user.decorator.ts",
+        "dewan-backend/common/guards/jwt-auth.guard.ts",
+        "dewan-backend/common/guards/roles.guard.ts",
+        "dewan-backend/common/strategies/jwt.strategy.ts",
+        "dewan-backend/common/interceptors/tenant.interceptor.ts",
+        "dewan-backend/common/interceptors/audit-log.interceptor.ts",
+        "dewan-backend/common/filters/http-exception.filter.ts",
+        "dewan-backend/modules/auth/auth.module.ts",
+        "dewan-backend/modules/auth/auth.controller.ts",
+        "dewan-backend/modules/auth/auth.service.ts",
+        "dewan-backend/modules/auth/dto/login.dto.ts",
+        "dewan-backend/modules/auth/dto/auth-response.dto.ts",
+        "dewan-backend/modules/auth/tests/auth.service.spec.ts",
+        "dewan-backend/modules/auth/tests/auth.controller.spec.ts",
+        "dewan-frontend/main.ts",
+        "dewan-frontend/environments/environment.ts",
+        "dewan-frontend/environments/environment.prod.ts",
+        "dewan-frontend/app/app.component.ts",
+        "dewan-frontend/app/app.config.ts",
+        "dewan-frontend/app/app.routes.ts",
+        "dewan-frontend/app/theme/dewan-preset.ts",
+        "dewan-frontend/core/models/auth.model.ts",
+        "dewan-frontend/core/auth/auth.service.ts",
+        "dewan-frontend/core/auth/auth.guard.ts",
+        "dewan-frontend/core/auth/jwt.interceptor.ts",
+        "dewan-frontend/core/services/api.service.ts",
+        "dewan-frontend/core/services/toast.service.ts",
+        "dewan-frontend/features/auth/pages/login.component.ts",
+        "dewan-frontend/features/auth/routes.ts"
+      ]
+    },
+    "SPEC-03-tenants": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 2,
+      "dependencies": [
+        "SPEC-01-auth"
+      ],
+      "completedAt": "2026-05-22",
+      "files": [
+        "dewan-backend/common/services/email.service.ts",
+        "dewan-backend/modules/tenants/tenants.module.ts",
+        "dewan-backend/modules/tenants/tenants.controller.ts",
+        "dewan-backend/modules/tenants/tenants.service.ts",
+        "dewan-backend/modules/tenants/dto/create-tenant.dto.ts",
+        "dewan-backend/modules/tenants/dto/update-tenant.dto.ts",
+        "dewan-backend/modules/tenants/dto/update-tenant-status.dto.ts",
+        "dewan-backend/modules/tenants/dto/tenant-query.dto.ts",
+        "dewan-backend/modules/tenants/tests/tenants.service.spec.ts",
+        "dewan-backend/modules/tenants/tests/tenants.controller.spec.ts",
+        "dewan-frontend/features/tenants/models/tenant.model.ts",
+        "dewan-frontend/features/tenants/services/tenants.service.ts",
+        "dewan-frontend/features/tenants/pages/tenant-list.component.ts",
+        "dewan-frontend/features/tenants/pages/tenant-detail.component.ts",
+        "dewan-frontend/features/tenants/pages/tenant-create.component.ts",
+        "dewan-frontend/features/tenants/routes.ts"
+      ]
+    },
+    "SPEC-02-users": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 3,
+      "dependencies": [
+        "SPEC-01-auth",
+        "SPEC-03-tenants"
+      ],
+      "completedAt": "2026-05-22",
+      "files": [
+        "dewan-backend/modules/users/users.module.ts",
+        "dewan-backend/modules/users/users.controller.ts",
+        "dewan-backend/modules/users/users.service.ts",
+        "dewan-backend/modules/users/dto/create-user.dto.ts",
+        "dewan-backend/modules/users/dto/update-user.dto.ts",
+        "dewan-backend/modules/users/dto/update-user-status.dto.ts",
+        "dewan-backend/modules/users/dto/change-password.dto.ts",
+        "dewan-backend/modules/users/dto/user-query.dto.ts",
+        "dewan-backend/modules/users/tests/users.service.spec.ts",
+        "dewan-backend/modules/users/tests/users.controller.spec.ts",
+        "dewan-frontend/features/users/models/user.model.ts",
+        "dewan-frontend/features/users/services/users.service.ts",
+        "dewan-frontend/features/users/pages/user-list.component.ts",
+        "dewan-frontend/features/users/pages/user-form.component.ts",
+        "dewan-frontend/features/users/pages/user-change-password.component.ts",
+        "dewan-frontend/features/users/routes.ts"
+      ]
+    },
+    "SPEC-04-units": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 4,
+      "dependencies": [],
+      "completedAt": "2026-05-23",
+      "files": [
+        "dewan-backend/modules/units/units.module.ts",
+        "dewan-backend/modules/units/units.controller.ts",
+        "dewan-backend/modules/units/units.service.ts",
+        "dewan-backend/modules/units/dto/create-unit-conversion.dto.ts",
+        "dewan-backend/modules/units/tests/units.service.spec.ts",
+        "dewan-backend/modules/units/tests/units.controller.spec.ts",
+        "dewan-frontend/features/units/models/unit.model.ts",
+        "dewan-frontend/features/units/services/units.service.ts",
+        "dewan-frontend/features/units/pages/unit-list.component.ts",
+        "dewan-frontend/features/units/routes.ts"
+      ]
+    },
+    "SPEC-06-categories": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 5,
+      "dependencies": [],
+      "completedAt": "2026-05-23",
+      "files": [
+        "dewan-backend/modules/categories/categories.module.ts",
+        "dewan-backend/modules/categories/categories.controller.ts",
+        "dewan-backend/modules/categories/categories.service.ts",
+        "dewan-backend/modules/categories/dto/create-category.dto.ts",
+        "dewan-backend/modules/categories/dto/update-category.dto.ts",
+        "dewan-backend/modules/categories/tests/categories.service.spec.ts",
+        "dewan-backend/modules/categories/tests/categories.controller.spec.ts",
+        "dewan-frontend/features/categories/models/category.model.ts",
+        "dewan-frontend/features/categories/services/categories.service.ts",
+        "dewan-frontend/features/categories/pages/category-list.component.ts",
+        "dewan-frontend/features/categories/routes.ts"
+      ]
+    },
+    "SPEC-05-products": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 6,
+      "dependencies": [
+        "SPEC-04-units",
+        "SPEC-06-categories"
+      ],
+      "completedAt": "2026-05-23",
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/modules/products/products.module.ts",
+        "dewan-backend/modules/products/products.controller.ts",
+        "dewan-backend/modules/products/products.service.ts",
+        "dewan-backend/modules/products/dto/create-product.dto.ts",
+        "dewan-backend/modules/products/dto/update-product.dto.ts",
+        "dewan-backend/modules/products/dto/product-query.dto.ts",
+        "dewan-backend/modules/products/dto/update-product-status.dto.ts",
+        "dewan-backend/modules/products/dto/recipe-item.dto.ts",
+        "dewan-backend/modules/products/tests/products.service.spec.ts",
+        "dewan-backend/modules/products/tests/products.controller.spec.ts",
+        "dewan-frontend/features/products/models/product.model.ts",
+        "dewan-frontend/features/products/services/products.service.ts",
+        "dewan-frontend/features/products/pages/product-list.component.ts",
+        "dewan-frontend/features/products/pages/product-form.component.ts",
+        "dewan-frontend/features/products/pages/product-detail.component.ts",
+        "dewan-frontend/features/products/routes.ts"
+      ]
+    },
+    "SPEC-10-cash-register": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 7,
+      "dependencies": [],
+      "completedAt": "2026-05-24",
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/modules/cash-registers/cash-registers.module.ts",
+        "dewan-backend/modules/cash-registers/cash-registers.controller.ts",
+        "dewan-backend/modules/cash-registers/cash-registers.service.ts",
+        "dewan-backend/modules/cash-registers/dto/open-cash-register.dto.ts",
+        "dewan-backend/modules/cash-registers/dto/close-cash-register.dto.ts",
+        "dewan-backend/modules/cash-registers/tests/cash-registers.service.spec.ts",
+        "dewan-backend/modules/cash-registers/tests/cash-registers.controller.spec.ts",
+        "dewan-frontend/features/cash-registers/models/cash-register.model.ts",
+        "dewan-frontend/features/cash-registers/services/cash-registers.service.ts",
+        "dewan-frontend/features/cash-registers/pages/cash-register-current.component.ts",
+        "dewan-frontend/features/cash-registers/routes.ts"
+      ]
+    },
+    "SPEC-11-movements": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 8,
+      "dependencies": [
+        "SPEC-10-cash-register"
+      ],
+      "completedAt": "2026-05-24",
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/modules/movements/movements.module.ts",
+        "dewan-backend/modules/movements/movements.controller.ts",
+        "dewan-backend/modules/movements/movements.service.ts",
+        "dewan-backend/modules/movements/dto/create-movement.dto.ts",
+        "dewan-backend/modules/movements/dto/movement-query.dto.ts",
+        "dewan-backend/modules/movements/tests/movements.service.spec.ts",
+        "dewan-backend/modules/movements/tests/movements.controller.spec.ts",
+        "dewan-frontend/features/movements/models/movement.model.ts",
+        "dewan-frontend/features/movements/services/movements.service.ts",
+        "dewan-frontend/features/movements/pages/movement-list.component.ts",
+        "dewan-frontend/features/movements/routes.ts"
+      ]
+    },
+    "SPEC-12-customers": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 9,
+      "dependencies": [],
+      "completedAt": "2026-05-24",
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/modules/customers/customers.module.ts",
+        "dewan-backend/modules/customers/customers.controller.ts",
+        "dewan-backend/modules/customers/customers.service.ts",
+        "dewan-backend/modules/customers/dto/create-customer.dto.ts",
+        "dewan-backend/modules/customers/dto/update-customer.dto.ts",
+        "dewan-backend/modules/customers/dto/customer-query.dto.ts",
+        "dewan-backend/modules/customers/tests/customers.service.spec.ts",
+        "dewan-backend/modules/customers/tests/customers.controller.spec.ts",
+        "dewan-frontend/features/customers/models/customer.model.ts",
+        "dewan-frontend/features/customers/services/customers.service.ts",
+        "dewan-frontend/features/customers/pages/customer-list.component.ts",
+        "dewan-frontend/features/customers/pages/customer-form.component.ts",
+        "dewan-frontend/features/customers/routes.ts"
+      ]
+    },
+    "SPEC-07-orders": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 10,
+      "dependencies": [
+        "SPEC-05-products",
+        "SPEC-10-cash-register",
+        "SPEC-12-customers"
+      ],
+      "completedAt": "2026-05-24",
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/common/gateway/events.gateway.ts",
+        "dewan-backend/common/common.module.ts",
+        "dewan-backend/modules/orders/orders.module.ts",
+        "dewan-backend/modules/orders/orders.controller.ts",
+        "dewan-backend/modules/orders/orders.service.ts",
+        "dewan-backend/modules/orders/dto/create-order.dto.ts",
+        "dewan-backend/modules/orders/dto/add-item.dto.ts",
+        "dewan-backend/modules/orders/dto/order-query.dto.ts",
+        "dewan-backend/modules/orders/tests/orders.service.spec.ts",
+        "dewan-backend/modules/orders/tests/orders.controller.spec.ts",
+        "dewan-frontend/features/orders/models/order.model.ts",
+        "dewan-frontend/features/orders/services/orders.service.ts",
+        "dewan-frontend/features/orders/pages/order-list.component.ts",
+        "dewan-frontend/features/orders/pages/order-detail.component.ts",
+        "dewan-frontend/features/orders/pages/order-create.component.ts",
+        "dewan-frontend/features/orders/routes.ts"
+      ]
+    },
+    "SPEC-08-kitchen": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 11,
+      "dependencies": [
+        "SPEC-07-orders"
+      ],
+      "completedAt": "2026-05-24",
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/modules/kitchen/kitchen.module.ts",
+        "dewan-backend/modules/kitchen/kitchen.controller.ts",
+        "dewan-backend/modules/kitchen/kitchen.service.ts",
+        "dewan-backend/modules/kitchen/dto/reject-order.dto.ts",
+        "dewan-backend/modules/kitchen/tests/kitchen.service.spec.ts",
+        "dewan-backend/modules/kitchen/tests/kitchen.controller.spec.ts",
+        "dewan-backend/modules/orders/orders.controller.ts",
+        "dewan-backend/modules/orders/orders.service.ts",
+        "dewan-frontend/features/kitchen/models/kitchen.model.ts",
+        "dewan-frontend/features/kitchen/services/kitchen.service.ts",
+        "dewan-frontend/features/kitchen/pages/kitchen-view.component.ts",
+        "dewan-frontend/features/kitchen/routes.ts"
+      ]
+    },
+    "SPEC-09-payments": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 12,
+      "dependencies": [
+        "SPEC-07-orders",
+        "SPEC-10-cash-register"
+      ],
+      "completedAt": "2026-05-31",
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/modules/payments/payments.module.ts",
+        "dewan-backend/modules/payments/payments.controller.ts",
+        "dewan-backend/modules/payments/payments.service.ts",
+        "dewan-backend/modules/payments/dto/create-payment.dto.ts",
+        "dewan-backend/modules/payments/tests/payments.service.spec.ts",
+        "dewan-backend/modules/payments/tests/payments.controller.spec.ts",
+        "dewan-frontend/features/payments/models/payment.model.ts",
+        "dewan-frontend/features/payments/services/payments.service.ts",
+        "dewan-frontend/features/payments/components/payment-dialog.component.ts",
+        "dewan-frontend/features/payments/routes.ts"
+      ]
+    },
+    "SPEC-13-delivery": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 13,
+      "dependencies": [
+        "SPEC-07-orders"
+      ],
+      "completedAt": "2026-05-31",
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/modules/delivery/delivery.module.ts",
+        "dewan-backend/modules/delivery/delivery-persons.controller.ts",
+        "dewan-backend/modules/delivery/delivery-orders.controller.ts",
+        "dewan-backend/modules/delivery/delivery.service.ts",
+        "dewan-backend/modules/delivery/dto/create-delivery-person.dto.ts",
+        "dewan-backend/modules/delivery/dto/delivery-query.dto.ts",
+        "dewan-backend/modules/delivery/dto/assign-delivery-person.dto.ts",
+        "dewan-backend/modules/delivery/dto/money-collected.dto.ts",
+        "dewan-backend/modules/delivery/tests/delivery.service.spec.ts",
+        "dewan-backend/modules/delivery/tests/delivery.controller.spec.ts",
+        "dewan-backend/modules/payments/payments.service.ts",
+        "dewan-frontend/features/delivery/models/delivery.model.ts",
+        "dewan-frontend/features/delivery/services/delivery.service.ts",
+        "dewan-frontend/features/delivery/pages/delivery-persons-list.component.ts",
+        "dewan-frontend/features/delivery/pages/delivery-orders-view.component.ts",
+        "dewan-frontend/features/delivery/routes.ts",
+        "dewan-frontend/app/app.routes.ts"
+      ]
+    },
+    "SPEC-14-suppliers": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 14,
+      "dependencies": [],
+      "completedAt": "2026-05-31",
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/modules/suppliers/suppliers.module.ts",
+        "dewan-backend/modules/suppliers/suppliers.controller.ts",
+        "dewan-backend/modules/suppliers/suppliers.service.ts",
+        "dewan-backend/modules/suppliers/dto/create-supplier.dto.ts",
+        "dewan-backend/modules/suppliers/dto/update-supplier.dto.ts",
+        "dewan-backend/modules/suppliers/dto/update-supplier-status.dto.ts",
+        "dewan-backend/modules/suppliers/dto/supplier-query.dto.ts",
+        "dewan-backend/modules/suppliers/tests/suppliers.service.spec.ts",
+        "dewan-backend/modules/suppliers/tests/suppliers.controller.spec.ts",
+        "dewan-backend/app.module.ts",
+        "dewan-frontend/features/suppliers/models/supplier.model.ts",
+        "dewan-frontend/features/suppliers/services/suppliers.service.ts",
+        "dewan-frontend/features/suppliers/pages/supplier-list.component.ts",
+        "dewan-frontend/features/suppliers/pages/supplier-form.component.ts",
+        "dewan-frontend/features/suppliers/routes.ts",
+        "dewan-frontend/app/app.routes.ts"
+      ]
+    },
+    "SPEC-15-purchases": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 15,
+      "dependencies": [
+        "SPEC-14-suppliers",
+        "SPEC-05-products"
+      ],
+      "completedAt": "2026-05-31",
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/modules/purchases/purchases.module.ts",
+        "dewan-backend/modules/purchases/purchases.controller.ts",
+        "dewan-backend/modules/purchases/purchases.service.ts",
+        "dewan-backend/modules/purchases/dto/create-purchase.dto.ts",
+        "dewan-backend/modules/purchases/dto/purchase-query.dto.ts",
+        "dewan-backend/modules/purchases/tests/purchases.service.spec.ts",
+        "dewan-backend/modules/purchases/tests/purchases.controller.spec.ts",
+        "dewan-backend/app.module.ts",
+        "dewan-frontend/features/purchases/models/purchase.model.ts",
+        "dewan-frontend/features/purchases/services/purchases.service.ts",
+        "dewan-frontend/features/purchases/pages/purchase-list.component.ts",
+        "dewan-frontend/features/purchases/pages/purchase-create.component.ts",
+        "dewan-frontend/features/purchases/pages/purchase-detail.component.ts",
+        "dewan-frontend/features/purchases/routes.ts",
+        "dewan-frontend/app/app.routes.ts"
+      ]
+    },
+    "SPEC-16-inventory": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 16,
+      "dependencies": [
+        "SPEC-05-products"
+      ],
+      "completedAt": "2026-05-31",
+      "files": [
+        "dewan-backend/modules/inventory/inventory.module.ts",
+        "dewan-backend/modules/inventory/inventory.controller.ts",
+        "dewan-backend/modules/inventory/inventory.service.ts",
+        "dewan-backend/modules/inventory/dto/create-adjustment.dto.ts",
+        "dewan-backend/modules/inventory/dto/adjustment-query.dto.ts",
+        "dewan-backend/modules/inventory/tests/inventory.service.spec.ts",
+        "dewan-backend/modules/inventory/tests/inventory.controller.spec.ts",
+        "dewan-backend/app.module.ts",
+        "dewan-frontend/features/inventory/models/inventory.model.ts",
+        "dewan-frontend/features/inventory/services/inventory.service.ts",
+        "dewan-frontend/features/inventory/pages/inventory-adjustments.component.ts",
+        "dewan-frontend/features/inventory/pages/inventory-low-stock.component.ts",
+        "dewan-frontend/features/inventory/routes.ts",
+        "dewan-frontend/app/app.routes.ts"
+      ]
+    },
+    "SPEC-18-notifications": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "phase2Status": "done",
+      "phase2Notes": "UC-18-04 y UC-18-05 implementados en notification-bell.component.ts con SPEC-20.",
+      "order": 17,
+      "dependencies": [],
+      "completedAt": "2026-05-31",
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/modules/notifications/notifications.module.ts",
+        "dewan-backend/modules/notifications/notifications.controller.ts",
+        "dewan-backend/modules/notifications/notifications.service.ts",
+        "dewan-backend/modules/notifications/dto/notification-query.dto.ts",
+        "dewan-backend/modules/notifications/tests/notifications.service.spec.ts",
+        "dewan-backend/modules/notifications/tests/notifications.controller.spec.ts",
+        "dewan-backend/modules/orders/orders.module.ts",
+        "dewan-backend/modules/orders/orders.service.ts",
+        "dewan-backend/modules/kitchen/kitchen.module.ts",
+        "dewan-backend/modules/kitchen/kitchen.service.ts",
+        "dewan-backend/modules/cash-registers/cash-registers.module.ts",
+        "dewan-backend/modules/cash-registers/cash-registers.service.ts",
+        "dewan-backend/app.module.ts",
+        "dewan-frontend/features/notifications/models/notification.model.ts",
+        "dewan-frontend/features/notifications/services/notifications.service.ts",
+        "dewan-frontend/features/notifications/pages/notification-list.component.ts",
+        "dewan-frontend/features/notifications/components/notification-bell.component.ts",
+        "dewan-frontend/features/notifications/routes.ts",
+        "dewan-frontend/app/app.routes.ts"
+      ]
+    },
+    "SPEC-19-audit-log": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "phase2Status": "pending",
+      "phase2Notes": "Restringir a SA-only (remover OW/AD de @Roles). Frontend: mover ruta a /admin/audit-logs, añadir selector de tenant (UC-19-03). Hacer tenantId requerido en query.",
+      "order": 18,
+      "dependencies": [],
+      "completedAt": "2026-05-31",
+      "files": [
+        "dewan-backend/modules/audit-logs/audit-logs.module.ts",
+        "dewan-backend/modules/audit-logs/audit-logs.controller.ts",
+        "dewan-backend/modules/audit-logs/audit-logs.service.ts",
+        "dewan-backend/modules/audit-logs/dto/audit-log-query.dto.ts",
+        "dewan-backend/modules/audit-logs/tests/audit-logs.service.spec.ts",
+        "dewan-backend/modules/audit-logs/tests/audit-logs.controller.spec.ts",
+        "dewan-backend/app.module.ts",
+        "dewan-frontend/features/audit-logs/models/audit-log.model.ts",
+        "dewan-frontend/features/audit-logs/services/audit-logs.service.ts",
+        "dewan-frontend/features/audit-logs/pages/audit-log-list.component.ts",
+        "dewan-frontend/features/audit-logs/pages/audit-log-entity.component.ts",
+        "dewan-frontend/features/audit-logs/routes.ts",
+        "dewan-frontend/app/app.routes.ts"
+      ]
+    },
+    "SPEC-17-reports": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
+      "order": 19,
+      "dependencies": [
+        "SPEC-07-orders",
+        "SPEC-09-payments",
+        "SPEC-10-cash-register",
+        "SPEC-11-movements",
+        "SPEC-15-purchases"
+      ],
+      "completedAt": "2026-05-31",
+      "files": [
+        "dewan-backend/modules/reports/reports.module.ts",
+        "dewan-backend/modules/reports/reports.controller.ts",
+        "dewan-backend/modules/reports/reports.service.ts",
+        "dewan-backend/modules/reports/dto/sales-report-query.dto.ts",
+        "dewan-backend/modules/reports/dto/cash-register-report-query.dto.ts",
+        "dewan-backend/modules/reports/dto/movements-report-query.dto.ts",
+        "dewan-backend/modules/reports/dto/purchases-report-query.dto.ts",
+        "dewan-backend/modules/reports/tests/reports.service.spec.ts",
+        "dewan-backend/modules/reports/tests/reports.controller.spec.ts",
+        "dewan-backend/app.module.ts",
+        "dewan-frontend/features/reports/models/report.model.ts",
+        "dewan-frontend/features/reports/services/reports.service.ts",
+        "dewan-frontend/features/reports/pages/sales-report.component.ts",
+        "dewan-frontend/features/reports/pages/cash-register-report.component.ts",
+        "dewan-frontend/features/reports/pages/movements-report.component.ts",
+        "dewan-frontend/features/reports/pages/low-stock-report.component.ts",
+        "dewan-frontend/features/reports/pages/purchases-report.component.ts",
+        "dewan-frontend/features/reports/routes.ts",
+        "dewan-frontend/app/app.routes.ts"
+      ]
+    },
+    "SPEC-20-websocket": {
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "pending",
+      "order": 20,
+      "phase": 2,
+      "priority": 1,
+      "completedAt": "2026-06-23",
+      "dependencies": [
+        "SPEC-01-auth"
+      ],
+      "affects": [
+        "SPEC-07-orders",
+        "SPEC-08-kitchen",
+        "SPEC-18-notifications"
+      ],
+      "specFile": ".claude/docs/specs/SPEC-20-websocket.md",
+      "files": [
+        "dewan-backend/common/gateway/events.gateway.ts",
+        "dewan-backend/common/common.module.ts",
+        "dewan-frontend/core/services/websocket.service.ts",
+        "dewan-frontend/core/auth/auth.service.ts",
+        "dewan-frontend/features/kitchen/pages/kitchen-view.component.ts",
+        "dewan-frontend/features/notifications/components/notification-bell.component.ts",
+        "dewan-frontend/features/orders/pages/order-list.component.ts"
+      ]
+    },
+    "SPEC-21-multi-tenant-owner": {
+      "status": "pending",
+      "backend": "pending",
+      "frontend": "pending",
+      "tests": "pending",
+      "order": 21,
+      "phase": 2,
+      "priority": 2,
+      "dependencies": [
+        "SPEC-01-auth",
+        "SPEC-03-tenants"
+      ],
+      "specFile": ".claude/docs/specs/SPEC-21-multi-tenant-owner.md",
+      "schemaChanges": [
+        "Add UserTenant model (user_tenants table)",
+        "Add User.extraTenants relation",
+        "Add Tenant.extraOwners relation"
+      ],
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/prisma/migrations/",
+        "dewan-backend/modules/auth/auth.controller.ts",
+        "dewan-backend/modules/auth/auth.service.ts",
+        "dewan-backend/modules/auth/dto/switch-tenant.dto.ts",
+        "dewan-backend/modules/tenants/tenants.controller.ts",
+        "dewan-backend/modules/tenants/tenants.service.ts",
+        "dewan-backend/modules/tenants/dto/link-owner.dto.ts",
+        "dewan-backend/modules/owners/owners.module.ts",
+        "dewan-backend/modules/owners/owners.controller.ts",
+        "dewan-backend/modules/owners/owners.service.ts",
+        "dewan-frontend/core/auth/auth.service.ts",
+        "dewan-frontend/core/models/auth.model.ts",
+        "dewan-frontend/app/shell/shell.component.ts",
+        "dewan-frontend/features/dashboard/services/dashboard.service.ts"
+      ]
+    },
+    "SPEC-22-performance": {
+      "status": "pending",
+      "backend": "pending",
+      "frontend": "pending",
+      "tests": "pending",
+      "order": 22,
+      "phase": 2,
+      "priority": 1,
+      "dependencies": [],
+      "specFile": ".claude/docs/specs/SPEC-22-performance.md",
+      "items": {
+        "PERF-01-compression": "pending",
+        "PERF-02-cache-control": "pending",
+        "PERF-03-db-indexes": "pending",
+        "PERF-04-prisma-select": "pending",
+        "PERF-05-lazy-routes": "pending",
+        "PERF-06-on-push": "pending",
+        "PERF-07-fonts": "pending",
+        "PERF-08-images": "pending",
+        "PERF-09-nginx-cloudflare": "pending",
+        "PERF-10-websocket-singleton": "blocked-by-SPEC-20"
+      },
+      "files": [
+        "dewan-backend/main.ts",
+        "dewan-backend/modules/units/units.controller.ts",
+        "dewan-backend/modules/categories/categories.controller.ts",
+        "dewan-backend/modules/products/products.controller.ts",
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-frontend/app/app.routes.ts",
+        "dewan-frontend/index.html",
+        "dewan-frontend/styles.scss",
+        "dewan-frontend/public/assets/fonts/"
+      ]
+    }
+  }
+}

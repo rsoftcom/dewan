@@ -1,0 +1,250 @@
+{
+  "description": "Permission audit: menu visibility vs route guard vs backend @Roles per module",
+  "updatedAt": "2026-06-15",
+  "legend": {
+    "status": "ok | bug-fixed | needs-investigation",
+    "layers": "menu | route | backend"
+  },
+  "modules": [
+    {
+      "name": "auth",
+      "status": "ok",
+      "notes": "login/refresh @Public(), logout/me JWT-only. No mismatch."
+    },
+    {
+      "name": "tenants",
+      "status": "ok",
+      "menu": ["super_admin"],
+      "route": ["super_admin"],
+      "backend": ["super_admin"],
+      "notes": "Fully consistent."
+    },
+    {
+      "name": "users",
+      "status": "ok",
+      "menu": ["owner", "admin"],
+      "route": ["owner", "admin"],
+      "backend": ["super_admin", "owner", "admin"],
+      "notes": "Backend also allows super_admin for management purposes — no UI mismatch."
+    },
+    {
+      "name": "units",
+      "status": "ok",
+      "menu": ["owner", "admin"],
+      "route": ["super_admin", "owner", "admin"],
+      "backend": {
+        "GET /units": "all-authenticated",
+        "POST /conversions": ["super_admin"],
+        "GET /conversions": ["super_admin", "owner", "admin"]
+      },
+      "notes": "GET /units is globally readable (intentional). No 403 risk."
+    },
+    {
+      "name": "categories",
+      "status": "ok",
+      "menu": ["owner", "admin"],
+      "route": ["owner", "admin"],
+      "backend": {
+        "write": ["owner", "admin"],
+        "read": ["owner", "admin", "cashier", "waiter"]
+      },
+      "notes": "Backend widens read to cashier/waiter for order-creation flows, but they have no direct /categories page — intentional."
+    },
+    {
+      "name": "products",
+      "status": "ok",
+      "menu": ["owner", "admin"],
+      "route": ["owner", "admin"],
+      "backend": {
+        "write": ["owner", "admin"],
+        "read": ["owner", "admin", "cashier", "waiter"]
+      },
+      "notes": "Same as categories — read widens for order creation. No page-level mismatch."
+    },
+    {
+      "name": "cash-registers",
+      "status": "ok",
+      "menu": ["owner", "admin", "cashier"],
+      "route": ["owner", "admin", "cashier"],
+      "backend": ["owner", "admin", "cashier"],
+      "notes": "Class-level @Roles. Fully consistent."
+    },
+    {
+      "name": "movements",
+      "status": "ok",
+      "menu": ["owner", "admin"],
+      "route": ["owner", "admin"],
+      "backend": ["owner", "admin"],
+      "notes": "Class-level @Roles. Fully consistent."
+    },
+    {
+      "name": "customers",
+      "status": "ok",
+      "menu": ["owner", "admin"],
+      "route": ["owner", "admin"],
+      "backend": {
+        "GET /customers": ["owner", "admin"],
+        "GET /customers/search": ["owner", "admin", "cashier"],
+        "POST /customers": ["owner", "admin", "cashier"],
+        "PATCH /customers/:id": ["owner", "admin", "cashier"]
+      },
+      "notes": "Cashier can search/create customers via order flow endpoints — no /customers page access needed."
+    },
+    {
+      "name": "orders",
+      "status": "bug-fixed",
+      "menu": ["owner", "admin", "cashier", "waiter"],
+      "route": ["owner", "admin", "cashier", "waiter"],
+      "backend": {
+        "POST /orders": ["owner", "admin", "cashier", "waiter"],
+        "GET /orders": ["owner", "admin", "cashier", "waiter", "delivery"],
+        "GET /orders/:id": ["owner", "admin", "cashier", "waiter"],
+        "POST /orders/:id/items": ["owner", "admin", "cashier", "waiter"],
+        "DELETE /orders/:id/items/:itemId": ["owner", "admin", "cashier", "waiter"],
+        "PATCH /orders/:id/serve": ["owner", "admin", "cashier", "waiter"]
+      },
+      "bugs": [
+        {
+          "id": "BUG-1",
+          "description": "WAITER excluded from GET /orders — service already filters but controller blocked first",
+          "fix": "Added ROLES.WAITER to @Roles on findAll in orders.controller.ts",
+          "fixedAt": "2026-06-15"
+        },
+        {
+          "id": "BUG-2",
+          "description": "DELIVERY excluded from GET /orders — delivery orders view called this endpoint",
+          "fix": "Added ROLES.DELIVERY to @Roles on findAll in orders.controller.ts",
+          "fixedAt": "2026-06-15"
+        }
+      ],
+      "notes": "Service filters: waiter → own orders only; delivery → delivery-type orders only."
+    },
+    {
+      "name": "tables",
+      "status": "ok",
+      "menu": ["owner", "admin", "cashier", "waiter"],
+      "route": ["owner", "admin", "cashier", "waiter"],
+      "backend": {
+        "GET /tables": ["owner", "admin", "cashier", "waiter", "kitchen", "delivery"],
+        "POST /tables": ["owner", "admin"],
+        "PATCH /tables/:id": ["owner", "admin"],
+        "DELETE /tables/:id": ["owner", "admin"]
+      },
+      "notes": "Read is intentionally wide (kitchen/delivery also need table info). Writes restricted to management."
+    },
+    {
+      "name": "kitchen",
+      "status": "ok",
+      "menu": ["owner", "admin", "kitchen"],
+      "route": ["owner", "admin", "kitchen"],
+      "backend": ["kitchen", "owner", "admin"],
+      "notes": "Class-level @Roles. Fully consistent."
+    },
+    {
+      "name": "delivery",
+      "status": "bug-fixed",
+      "menu": ["owner", "admin", "delivery"],
+      "route": ["owner", "admin", "delivery"],
+      "backend": {
+        "GET /delivery-persons": ["owner", "admin", "cashier"],
+        "POST /delivery-persons": ["owner", "admin"],
+        "PATCH /orders/:id/assign": ["owner", "admin", "cashier"],
+        "PATCH /orders/:id/on-the-way": ["owner", "admin", "delivery"],
+        "PATCH /orders/:id/delivered": ["owner", "admin", "delivery"],
+        "PATCH /orders/:id/money-collected": ["owner", "admin", "delivery"]
+      },
+      "bugs": [
+        {
+          "id": "BUG-3",
+          "description": "DELIVERY role could navigate to /delivery/persons and call GET /delivery-persons → 403",
+          "fix": "Added canActivate: [roleGuard(OWNER, ADMIN, CASHIER)] to /persons child route in delivery/routes.ts",
+          "fixedAt": "2026-06-15"
+        },
+        {
+          "id": "BUG-5",
+          "description": "delivery-orders-view.component.ts called loadPersons() unconditionally → DELIVERY role got 403 on GET /delivery-persons on page load. Also showed 'Asignar' button to delivery users who can't call PATCH /orders/:id/assign",
+          "fix": "Injected AuthService, added canManage computed (owner|admin|cashier), guarded loadPersons() call and 'Asignar' button with canManage()",
+          "fixedAt": "2026-06-15"
+        }
+      ],
+      "notes": "Delivery users see only their order queue and status-transition buttons. Person management and assignment is now correctly restricted to owner/admin/cashier."
+    },
+    {
+      "name": "payments",
+      "status": "bug-fixed",
+      "menu": "none (triggered from order detail)",
+      "route": "inherited from /orders parent guard",
+      "backend": ["owner", "admin", "cashier"],
+      "bugs": [
+        {
+          "id": "BUG-4",
+          "description": "order-detail.component.ts showed 'Cobrar' and 'Completar' buttons to WAITER (canPay/canComplete only checked order status, not role). Clicking either called POST /orders/:id/payments or PATCH /orders/:id/complete → 403",
+          "fix": "Added role !== 'waiter' check inside canPay and canComplete computed signals in order-detail.component.ts",
+          "fixedAt": "2026-06-15"
+        }
+      ],
+      "notes": "WAITER can view order detail but cannot initiate payment — intentional business rule, now enforced in UI."
+    },
+    {
+      "name": "suppliers",
+      "status": "ok",
+      "menu": ["owner", "admin"],
+      "route": ["owner", "admin"],
+      "backend": ["owner", "admin"],
+      "notes": "Class-level @Roles. Fully consistent."
+    },
+    {
+      "name": "purchases",
+      "status": "ok",
+      "menu": ["owner", "admin"],
+      "route": ["owner", "admin"],
+      "backend": ["owner", "admin"],
+      "notes": "Class-level @Roles. Fully consistent."
+    },
+    {
+      "name": "inventory",
+      "status": "ok",
+      "menu": ["owner", "admin"],
+      "route": ["owner", "admin"],
+      "backend": ["owner", "admin"],
+      "notes": "Class-level @Roles. Fully consistent."
+    },
+    {
+      "name": "notifications",
+      "status": "ok",
+      "menu": ["owner", "admin", "cashier", "waiter", "kitchen", "delivery"],
+      "route": "any authenticated (no roleGuard)",
+      "backend": "any authenticated (no @Roles — user-scoped by service)",
+      "notes": "User-scoped at service layer: each user sees only their own notifications."
+    },
+    {
+      "name": "audit-logs",
+      "status": "ok",
+      "menu": ["owner", "admin"],
+      "route": ["owner", "admin"],
+      "backend": ["owner", "admin"],
+      "notes": "Class-level @Roles. Fully consistent."
+    },
+    {
+      "name": "reports",
+      "status": "ok",
+      "menu": ["owner", "admin"],
+      "route": ["owner", "admin"],
+      "backend": ["owner", "admin"],
+      "notes": "Class-level @Roles. Fully consistent."
+    }
+  ],
+  "summary": {
+    "total": 19,
+    "ok": 14,
+    "bugFixed": 5,
+    "needsInvestigation": 0,
+    "bugsFixed": [
+      "BUG-1: WAITER blocked from GET /orders — backend role missing (orders.controller.ts)",
+      "BUG-2: DELIVERY blocked from GET /orders — backend role missing (orders.controller.ts)",
+      "BUG-3: DELIVERY could navigate to /delivery/persons sub-route and get 403 (delivery/routes.ts)",
+      "BUG-4: WAITER saw Cobrar/Completar buttons in order-detail but payments backend rejects waiter (order-detail.component.ts)",
+      "BUG-5: delivery-orders-view loaded GET /delivery-persons unconditionally; DELIVERY role got 403 on page load; Asignar button shown to delivery users (delivery-orders-view.component.ts)"
+    ]
+  }
+}

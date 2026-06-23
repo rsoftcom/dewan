@@ -1,0 +1,17 @@
+# Sub-repos (each has its own git history)
+dewan-backend/
+dewan-frontend/
+
+# Claude auto-memory (personal, not project docs)
+memory/
+
+# Local Claude settings
+.claude/settings.local.json
+
+# Cloudflare origin certificates (sensitive — never commit)
+deploy/cloudflare/private-key.pem
+deploy/cloudflare/certificate.pem
+
+# macOS metadata
+.DS_Store
+**/.DS_Store
