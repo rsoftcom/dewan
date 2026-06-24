@@ -4,7 +4,7 @@
   "createdAt": "2026-05-20",
   "updatedAt": "2026-06-23",
   "phase": "phase2",
-  "summary": "Fase 1 completa (19 módulos). Fase 2: SPEC-20 (WebSocket real-time) completado 2026-06-23. Pendientes: SPEC-21 (multi-tenant owner), SPEC-22 (performance). SPEC-18/SPEC-19 phase2 también resueltos con SPEC-20.",
+  "summary": "Fase 1 completa (19 módulos). Fase 2: SPEC-20 (WebSocket) y SPEC-21 (multi-tenant owner) completados 2026-06-23. Pendiente: SPEC-22 (performance).",
   "prisma": {
     "initialized": true,
     "schemaPath": "dewan-backend/prisma/schema.prisma"
@@ -675,13 +675,14 @@
       ]
     },
     "SPEC-21-multi-tenant-owner": {
-      "status": "pending",
-      "backend": "pending",
-      "frontend": "pending",
-      "tests": "pending",
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
+      "tests": "done",
       "order": 21,
       "phase": 2,
       "priority": 2,
+      "completedAt": "2026-06-23",
       "dependencies": [
         "SPEC-01-auth",
         "SPEC-03-tenants"
@@ -694,7 +695,7 @@
       ],
       "files": [
         "dewan-backend/prisma/schema.prisma",
-        "dewan-backend/prisma/migrations/",
+        "dewan-backend/prisma/migrations/20260623000001_add_user_tenants_table/migration.sql",
         "dewan-backend/modules/auth/auth.controller.ts",
         "dewan-backend/modules/auth/auth.service.ts",
         "dewan-backend/modules/auth/dto/switch-tenant.dto.ts",
@@ -704,9 +705,13 @@
         "dewan-backend/modules/owners/owners.module.ts",
         "dewan-backend/modules/owners/owners.controller.ts",
         "dewan-backend/modules/owners/owners.service.ts",
+        "dewan-backend/modules/owners/tests/owners.service.spec.ts",
+        "dewan-backend/modules/owners/tests/owners.controller.spec.ts",
+        "dewan-backend/app.module.ts",
         "dewan-frontend/core/auth/auth.service.ts",
         "dewan-frontend/core/models/auth.model.ts",
         "dewan-frontend/app/shell/shell.component.ts",
+        "dewan-frontend/features/dashboard/pages/dashboard.component.ts",
         "dewan-frontend/features/dashboard/services/dashboard.service.ts"
       ]
     },
