@@ -24,6 +24,44 @@ Tailwind sí puede usarse para espaciados simples (`mb-4`, `mt-2`) que no afecta
 
 ---
 
+## 0b. Input de PrimeNG dentro de un flex container (patrón crítico)
+
+`pInputText`, `p-inputNumber` y otros inputs de PrimeNG ignoran `flex: 1` y `width: 100%` cuando se aplican directamente al elemento input, porque los estilos globales de PrimeNG (`.p-inputtext`, `.p-inputnumber`) tienen la misma o mayor especificidad y pueden sobreescribirlos.
+
+**Patrón correcto: wrapper div**
+
+```html
+<!-- ✅ Correcto: el div absorbe el flex, el input solo necesita w-full -->
+<div class="flex-row">
+  <div class="input-wrap">          <!-- flex: 1; min-width: 0 -->
+    <input pInputText class="w-full" placeholder="..." />
+  </div>
+  <p-button label="Buscar" />
+</div>
+```
+
+```css
+.flex-row  { display: flex; gap: 8px; align-items: center; }
+.input-wrap { flex: 1; min-width: 0; }   /* min-width: 0 evita overflow en flex */
+```
+
+```html
+<!-- ❌ Incorrecto: PrimeNG puede sobreescribir flex:1 o width:100% en el input -->
+<div class="flex-row">
+  <input pInputText class="w-full" />   <!-- no se estira como se espera -->
+  <p-button label="Buscar" />
+</div>
+```
+
+**Por qué funciona el wrapper:**
+- El `div.input-wrap` es un elemento HTML plano → el CSS scoped del componente le aplica con certeza → controla el espacio en el flex container
+- El `input` con `class="w-full"` ocupa el 100% del div, no del flex container → libre de interferencias de PrimeNG
+- `min-width: 0` en el wrapper es necesario porque los flex items tienen `min-width: auto` por defecto, lo que puede causar overflow cuando el contenido (placeholder largo) excede el espacio disponible
+
+**Este patrón aplica a:** cualquier input PrimeNG (`pInputText`, `p-inputNumber`, `p-select`, `p-autoComplete`) que deba ocupar el espacio disponible en una fila flex.
+
+---
+
 ## 1. Principio general: CSS en scope, no inline
 
 Todos los componentes de página deben usar un bloque `styles:` con clases semánticas.

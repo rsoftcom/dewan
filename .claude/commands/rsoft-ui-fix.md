@@ -51,10 +51,11 @@ Por cada componente, verificar y corregir cada punto:
 - [ ] Opcionales: `<span style="color:#9C8E82; font-weight:400;">(opcional)</span>`
 - [ ] Footer: Cancelar (`severity="secondary"` + `[text]="true"`) + Submit (`icon="pi pi-check"`)
 
-### 5. p-inputNumber
+### 5. p-inputNumber y inputs PrimeNG en flex rows
 - [ ] Tiene `styleClass="w-full"` Y `[style]="{'width':'100%'}"` (ambos, no solo uno)
 - [ ] En bloque `styles:` tiene `::ng-deep .p-inputnumber { width:100%; }` y el `input` también
 - [ ] Inicializado en `null` (no `0`) para mostrar placeholder
+- [ ] Si el input está en una fila flex junto a un botón u otro elemento: usa un `<div class="input-wrap">` wrapper con `flex: 1; min-width: 0` — NO aplicar `flex:1` ni `width:100%` directamente al input PrimeNG (ver sección 0b de ui-conventions.md)
 
 ### 6. textarea
 - [ ] Usa `pTextarea` con `style="width:100%; resize:none;"` (no `class="w-full"`)
