@@ -5,7 +5,7 @@
 > **Versión:** 1.0
 > **Fecha:** 2026-05-19
 > **Stack:** NestJS · Prisma · PostgreSQL 16 · Angular 18 · Socket.io
-> **Convención:** Todos los endpoints usan el prefijo base `/api/v1`. Auth requerida salvo indicación contraria. Todos los listados soportan paginación con `?page=1&limit=20`.
+> **Convención:** Todos los endpoints usan el prefijo base `/v1` (configurado en `main.ts` via `setGlobalPrefix('v1')`). **No** `/api/v1`. Auth requerida salvo indicación contraria. Todos los listados soportan paginación con `?page=1&limit=20`.
 
 -----
 

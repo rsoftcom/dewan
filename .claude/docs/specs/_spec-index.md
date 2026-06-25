@@ -45,3 +45,10 @@
 | SPEC-19 | Acceso restringido a SA (elimina OW/AD). Ruta frontend → `/admin/audit-logs`. Añade UC-19-03 (selector de tenant) |
 | SPEC-01 | Añadir endpoints `GET /auth/my-tenants` y `POST /auth/switch-tenant` — ver SPEC-21 |
 | SPEC-03 | Añadir endpoints `POST /tenants/:id/link-owner` y `DELETE /tenants/:id/link-owner/:userId` — ver SPEC-21 |
+
+## Bugfixes post-lanzamiento (2026-06-24)
+
+| Módulo | Bug | Fix |
+|---|---|---|
+| SPEC-21 | Tenant selector visible para `super_admin` tras sesión de owner | `setSession()` limpia `_myTenants`; `showTenantSelector` guarda por `role==='owner'` |
+| SPEC-21 | Dashboard "Mis Negocios" vacío en primer login (race condition) | `login.component` llama `loadMyTenants()` antes de navegar; `dashboard.component` usa `effect()` reactivo |

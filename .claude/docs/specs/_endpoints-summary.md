@@ -8,6 +8,8 @@
 |                    |POST  |`/auth/refresh`                     |Público       |
 |                    |POST  |`/auth/logout`                      |Todos         |
 |                    |GET   |`/auth/me`                          |Todos         |
+|                    |GET   |`/auth/my-tenants`                  |OW            |
+|                    |POST  |`/auth/switch-tenant`               |OW            |
 |**Users**           |POST  |`/users`                            |OW, AD        |
 |                    |GET   |`/users`                            |OW, AD        |
 |                    |GET   |`/users/:id`                        |OW, AD, self  |
@@ -20,6 +22,8 @@
 |                    |GET   |`/tenants/:id`                      |SA, OW, AD    |
 |                    |PATCH |`/tenants/:id`                      |SA, OW, AD    |
 |                    |PATCH |`/tenants/:id/status`               |SA            |
+|                    |POST  |`/tenants/:id/link-owner`           |SA            |
+|                    |DELETE|`/tenants/:id/link-owner/:userId`   |SA            |
 |**Units**           |GET   |`/units`                            |Todos         |
 |                    |POST  |`/units/conversions`                |SA            |
 |                    |GET   |`/units/conversions`                |SA, OW, AD    |
@@ -80,8 +84,9 @@
 |**Notifications**   |GET   |`/notifications`                    |Todos         |
 |                    |PATCH |`/notifications/read-all`           |Todos         |
 |                    |PATCH |`/notifications/:id/read`           |Todos         |
-|**Audit Log**       |GET   |`/audit-logs`                       |OW, AD, SA    |
-|                    |GET   |`/audit-logs/entity/:entity/:id`    |OW, AD        |
+|**Audit Log**       |GET   |`/audit-logs`                       |SA            |
+|                    |GET   |`/audit-logs/entity/:entity/:id`    |SA            |
+|**Owners**          |GET   |`/owners/dashboard`                 |OW            |
 
 -----
 
@@ -95,4 +100,4 @@
 
 -----
 
-*Fin del documento SDD — R Soft v1.0 — 19 módulos · 57 casos de uso · 90+ endpoints*
+*Fin del documento SDD — R Soft v1.1 — 22 módulos (19 Fase 1 + 3 Fase 2) · actualizado 2026-06-24*

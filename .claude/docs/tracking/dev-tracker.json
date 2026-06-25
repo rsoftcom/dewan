@@ -16,8 +16,8 @@
     "pagination-dto": "done",
     "audit-interceptor": "done",
     "common-decorators": "done",
-    "websocket-gateway": "pending-phase2",
-    "websocket-service-frontend": "pending-phase2"
+    "websocket-gateway": "done",
+    "websocket-service-frontend": "done"
   },
   "buildOrder": [
     {

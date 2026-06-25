@@ -1,7 +1,7 @@
 # R Soft — Convenciones de UI: Componentes Frontend
 
-> **Versión:** 1.0
-> **Fecha:** 2026-05-31
+> **Versión:** 1.2
+> **Fecha:** 2026-06-24
 > **Referencia canónica:** `movement-list.component.ts` y `cash-register-current.component.ts`
 
 ---
@@ -569,6 +569,23 @@ Texto estándar por icono frecuente:
 | `pi pi-key` | `Resetear contraseña` |
 | `pi pi-shield` | `Ver auditoría` |
 | `pi pi-times` (small) | Contexto específico, ej. `Cambiar owner` |
+
+**Estilo global del tooltip** — el preset Aura no incluye padding para `.p-tooltip-text`. El override global vive en `styles.scss`:
+
+```scss
+/* ─── PrimeNG — Tooltip ─────── */
+.p-tooltip .p-tooltip-text {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  border-radius: var(--dw-radius-sm);
+  background: var(--dw-surface-800);
+  color: #fff;
+  white-space: nowrap;
+}
+```
+
+No reproducir este bloque en componentes individuales — ya está aplicado globalmente.
 
 ---
 
