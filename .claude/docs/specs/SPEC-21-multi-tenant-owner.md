@@ -341,6 +341,92 @@ Scenario: Dashboard con dos negocios
 
 ---
 
+## Notas de implementación y correcciones (2026-06-24)
+
+### UC-21-04 — Selector de tenant: bugs corregidos
+
+**Bug 1 — Selector visible para `super_admin` tras sesión de owner.**
+Síntoma: al iniciar sesión como super_admin después de una sesión de owner, el selector de tenant seguía visible en el navbar.
+
+Causa raíz: `setSession()` en `AuthService` no limpiaba `_myTenants`. El signal conservaba la lista de tenants de la sesión anterior.
+
+Corrección:
+```typescript
+// core/auth/auth.service.ts — setSession()
+private setSession(res: LoginResponse): void {
+  this._accessToken.set(res.accessToken);
+  this._currentUser.set(res.user);
+  this._myTenants.set([]);   // ← limpiar tenants de sesión anterior
+  localStorage.setItem(TOKEN_KEY, res.accessToken);
+  localStorage.setItem(USER_KEY, JSON.stringify(res.user));
+}
+```
+
+Corrección adicional defensiva en `ShellComponent`:
+```typescript
+// Antes: solo comprueba longitud
+showTenantSelector = computed(() => this.auth.myTenants().length > 1);
+
+// Después: guarda por rol además de longitud
+showTenantSelector = computed(() => this.user()?.role === 'owner' && this.auth.myTenants().length > 1);
+```
+
+---
+
+**Bug 2 — Dashboard sin cards "Mis Negocios" en el primer login.**
+Síntoma: al entrar como owner por primera vez, la sección "Mis Negocios" no mostraba las business cards.
+
+Causa raíz: race condition. `DashboardComponent.ngOnInit` se ejecutaba cuando `auth.myTenants()` aún era `[]` (la llamada `loadMyTenants()` del shell no había terminado). La condición era `false` y `getOwnerDashboard()` nunca se disparaba. Cuando el signal se actualizaba, el `@if` aparecía pero sin datos.
+
+**Corrección 1 — login.component.ts (primer login):**
+
+Para el rol `owner`, `loadMyTenants()` se llama antes de navegar, garantizando que el signal esté poblado cuando el dashboard renderice:
+
+```typescript
+next: res => {
+  const home = this.authService.getHomeRouteForRole(res.user.role);
+  if (res.user.role === 'owner') {
+    this.authService.loadMyTenants().subscribe({
+      next: () => this.router.navigateByUrl(home),
+      error: () => this.router.navigateByUrl(home),  // navegar aunque falle
+    });
+  } else {
+    this.router.navigateByUrl(home);
+  }
+},
+```
+
+**Corrección 2 — dashboard.component.ts (page refresh + resiliencia):**
+
+`ngOnInit` fue reemplazado por un `effect()` que reacciona reactivamente al signal `myTenants()`. El booleano `statsFetched` (no signal) evita llamadas duplicadas sin crear ciclos reactivos:
+
+```typescript
+// Antes — condición evaluada una sola vez en ngOnInit, ignorada si myTenants aún es []
+ngOnInit(): void {
+  if (this.auth.myTenants().length > 1) {
+    this.loadingStats.set(true);
+    this.dashboardService.getOwnerDashboard().subscribe(...);
+  }
+}
+
+// Después — effect reactivo que espera a que myTenants esté disponible
+private statsFetched = false;
+
+constructor() {
+  effect(() => {
+    const tenants = this.auth.myTenants();
+    if (tenants.length > 1 && !this.statsFetched) {
+      this.statsFetched = true;
+      this.fetchStats();
+    }
+  }, { allowSignalWrites: true });
+}
+```
+
+Este patrón cubre tanto el primer login (si `loadMyTenants` del login falla) como el page refresh (donde la llamada del shell sigue siendo asíncrona respecto al render del dashboard).
+
+---
+
 ## Archivos afectados
 
 **Backend:**

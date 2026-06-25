@@ -2,7 +2,7 @@
   "project": "dewan",
   "version": "1.0",
   "createdAt": "2026-05-20",
-  "updatedAt": "2026-06-23",
+  "updatedAt": "2026-06-24",
   "phase": "phase2",
   "summary": "Fase 1 completa (19 módulos). Fase 2: SPEC-20 (WebSocket) y SPEC-21 (multi-tenant owner) completados 2026-06-23. Pendiente: SPEC-22 (performance).",
   "prisma": {
@@ -155,7 +155,7 @@
       "dependencies": [
         "SPEC-01-auth"
       ],
-      "completedAt": "2026-05-22",
+      "completedAt": "2026-06-24",
       "files": [
         "dewan-backend/common/services/email.service.ts",
         "dewan-backend/modules/tenants/tenants.module.ts",
@@ -173,7 +173,8 @@
         "dewan-frontend/features/tenants/pages/tenant-detail.component.ts",
         "dewan-frontend/features/tenants/pages/tenant-create.component.ts",
         "dewan-frontend/features/tenants/routes.ts"
-      ]
+      ],
+      "notes": "2026-06-24: Añadido botón pi-shield en acción de cada fila del tenant-list para navegar a /admin/audit-logs?tenantId=<id>."
     },
     "SPEC-02-users": {
       "status": "done",
@@ -589,11 +590,11 @@
       "backend": "done",
       "frontend": "done",
       "tests": "done",
-      "phase2Status": "pending",
-      "phase2Notes": "Restringir a SA-only (remover OW/AD de @Roles). Frontend: mover ruta a /admin/audit-logs, añadir selector de tenant (UC-19-03). Hacer tenantId requerido en query.",
+      "phase2Status": "done",
+      "phase2Notes": "Completado 2026-06-24: backend restringido a SA-only (@Roles SUPER_ADMIN, sin TenantInterceptor, tenantId requerido en query param para findAll y findByEntity). Frontend: ruta en /admin/audit-logs, sin entrada de menu lateral, acceso via boton pi-shield en tenant-list, audit-log-list lee tenantId del query param.",
       "order": 18,
       "dependencies": [],
-      "completedAt": "2026-05-31",
+      "completedAt": "2026-06-24",
       "files": [
         "dewan-backend/modules/audit-logs/audit-logs.module.ts",
         "dewan-backend/modules/audit-logs/audit-logs.controller.ts",
@@ -683,6 +684,7 @@
       "phase": 2,
       "priority": 2,
       "completedAt": "2026-06-23",
+      "updatedAt": "2026-06-24",
       "dependencies": [
         "SPEC-01-auth",
         "SPEC-03-tenants"
@@ -692,6 +694,18 @@
         "Add UserTenant model (user_tenants table)",
         "Add User.extraTenants relation",
         "Add Tenant.extraOwners relation"
+      ],
+      "bugfixes": [
+        {
+          "date": "2026-06-24",
+          "description": "Tenant selector visible for super_admin after prior owner session",
+          "fix": "setSession() now clears _myTenants; showTenantSelector guards by role==='owner'"
+        },
+        {
+          "date": "2026-06-24",
+          "description": "Dashboard 'Mis Negocios' cards missing on first owner login (race condition)",
+          "fix": "login.component loads myTenants before navigation for owner; dashboard.component uses effect() to react to myTenants signal"
+        }
       ],
       "files": [
         "dewan-backend/prisma/schema.prisma",
@@ -711,6 +725,7 @@
         "dewan-frontend/core/auth/auth.service.ts",
         "dewan-frontend/core/models/auth.model.ts",
         "dewan-frontend/app/shell/shell.component.ts",
+        "dewan-frontend/features/auth/pages/login.component.ts",
         "dewan-frontend/features/dashboard/pages/dashboard.component.ts",
         "dewan-frontend/features/dashboard/services/dashboard.service.ts"
       ]
