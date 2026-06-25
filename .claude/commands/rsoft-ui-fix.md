@@ -27,6 +27,7 @@ Por cada componente, verificar y corregir cada punto:
 - [ ] Título usa `.page-title` (Outfit, 1.75rem, #1A1028) — no inline `style="font-family:..."`
 - [ ] Subtítulo usa `.page-sub` (#9C8E82, 0.875rem) — no inline `style="color:..."`
 - [ ] El botón de acción principal está dentro del `.page-header`
+- [ ] Si `.page-wrap` tiene `max-width`, también tiene `margin: 0 auto` para centrar (sin esto el contenido queda pegado a la izquierda)
 
 ### 2. Empty state
 - [ ] Usa `.empty-state-card` (flex-col center, white, border, radius 16px, padding 64px 32px)

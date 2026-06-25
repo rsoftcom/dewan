@@ -437,7 +437,15 @@ Para páginas con formulario de creación o detalle donde hay un botón de volve
 .back-header { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 36px; }
 ```
 
-> El `page-wrap` debe tener `max-width: 900px` cuando el contenido no debe expandirse a todo el ancho.
+> **Centrado obligatorio:** Cuando el `.page-wrap` tiene `max-width`, **siempre** agregar `margin: 0 auto` para centrarlo en la pantalla. Sin esto, el contenido queda pegado a la izquierda en pantallas anchas.
+>
+> ```css
+> /* Correcto */
+> .page-wrap { padding: 28px 32px; width: 100%; max-width: 900px; margin: 0 auto; }
+>
+> /* Incorrecto — se ve bien estrecho pero a la izquierda */
+> .page-wrap { padding: 28px 32px; width: 100%; max-width: 900px; }
+> ```
 
 ### 7.1c Secciones dentro de página de formulario
 
@@ -651,6 +659,7 @@ Reglas:
 Antes de considerar un componente de página terminado, verificar:
 
 - [ ] Root es `<div class="page-wrap">` con CSS en scope
+- [ ] Si `.page-wrap` tiene `max-width`, también tiene `margin: 0 auto`
 - [ ] Header usa `.page-header / .page-title / .page-sub`
 - [ ] Empty state usa `.empty-state-card` con `.empty-icon-wrap` tintado en coral
 - [ ] Tabla/contenido dentro de `.{mod}-card` (sin `p-card`, sin `shadow-sm`)
