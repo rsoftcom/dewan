@@ -2,8 +2,12 @@
 dewan-backend/
 dewan-frontend/
 
+# Test coverage output
+coverage/
+
 # Claude auto-memory (personal, not project docs)
 memory/
+.claude/projects/
 
 # Local Claude settings
 .claude/settings.local.json

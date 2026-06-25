@@ -34,8 +34,15 @@
 | SPEC-21-multi-tenant-owner.md | Multi-Tenant Owner | UC-21-01 to UC-21-05 | SPEC-01, SPEC-03, DB schema |
 | SPEC-22-performance.md | Performance | PERF-01 to PERF-10 | Transversal |
 
+## Fase 3 — Calidad y operaciones (SPEC-23+)
+
+| File | Module | Items | Afecta |
+|---|---|---|---|
+| SPEC-23-testing.md | Testing y Cobertura | TEST-01 to TEST-09 | Transversal (ambos repos) |
+
 **Fase 1:** 19 módulos · 57 use cases · 90+ endpoints  
-**Fase 2:** 3 specs transversales · cambios en schema, auth y capa real-time
+**Fase 2:** 3 specs transversales · cambios en schema, auth y capa real-time  
+**Fase 3:** calidad de código, testing y operaciones
 
 ## Cambios de fase 2 sobre specs existentes
 
