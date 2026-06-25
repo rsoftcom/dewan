@@ -529,7 +529,50 @@ Cuando la tabla tiene un título interno (dentro del `.{mod}-card`), usar `.card
 
 > **Regla:** NUNCA usar `style="margin-bottom:..."` inline en `section-title`. Usar la clase `.card-title` cuando está dentro de `.card-inner-header`.
 
-### 7.1e Filtros de búsqueda de texto (`p-iconfield`)
+### 7.1e Botones de solo icono — tooltip obligatorio
+
+Todo `p-button` que no tenga `label` visible (solo `icon=`) **debe llevar `pTooltip`** con texto descriptivo en español. Esto aplica tanto a la fila de escritorio como a la tarjeta móvil de cada componente.
+
+```html
+<!-- ✅ Correcto -->
+<p-button icon="pi pi-pencil" [text]="true" size="small" pTooltip="Editar" (onClick)="edit(row)" />
+<p-button icon="pi pi-trash" [text]="true" severity="danger" size="small" pTooltip="Eliminar" (onClick)="delete(row)" />
+
+<!-- Tooltip dinámico para acciones que cambian según estado -->
+<p-button
+  [icon]="row.status === 'active' ? 'pi pi-ban' : 'pi pi-check-circle'"
+  [pTooltip]="row.status === 'active' ? 'Desactivar' : 'Activar'"
+  [text]="true" size="small"
+  (onClick)="toggleStatus(row)"
+/>
+
+<!-- ❌ Incorrecto — botón de icono sin tooltip -->
+<p-button icon="pi pi-eye" [text]="true" size="small" (onClick)="view(row)" />
+```
+
+Reglas:
+- **`TooltipModule` de `primeng/tooltip` debe estar en el array `imports` del componente.** Sin él, `pTooltip` no funciona aunque esté en el template.
+- Usar `[pTooltip]="..."` (binding) para textos dinámicos, `pTooltip="texto"` para textos fijos.
+- No usar el atributo nativo `title=""` como sustituto de tooltip PrimeNG — no respeta el estilo del design system.
+- Tooltips en botones deshabilitados: agregar igual; PrimeNG los muestra al hacer hover incluso con `[disabled]="true"`.
+
+Texto estándar por icono frecuente:
+
+| Icono | Texto |
+|---|---|
+| `pi pi-eye` | `Ver detalle` |
+| `pi pi-pencil` | `Editar` |
+| `pi pi-trash` | `Eliminar` |
+| `pi pi-plus` (small) | Contexto específico, ej. `Agregar subcategoría` |
+| `pi pi-ban` | `Desactivar` |
+| `pi pi-check-circle` | `Activar` |
+| `pi pi-key` | `Resetear contraseña` |
+| `pi pi-shield` | `Ver auditoría` |
+| `pi pi-times` (small) | Contexto específico, ej. `Cambiar owner` |
+
+---
+
+### 7.1f Filtros de búsqueda de texto (`p-iconfield`)
 
 Para módulos con búsqueda de texto libre en la `filter-row`:
 
@@ -689,6 +732,8 @@ Reglas:
 | `style="..."` en divs estructurales | Clases en bloque `styles:` |
 | `amount: 0` en form init | `amount: null` para mostrar placeholder |
 | `class="w-full"` solo en `p-inputNumber` | También `styleClass="w-full"` + `[style]="{'width':'100%'}"` |
+| `title="..."` como tooltip | `pTooltip="..."` con `TooltipModule` importado (sección 7.1e) |
+| Botón icono sin tooltip | Todo `p-button` sin `label` debe tener `pTooltip` descriptivo |
 
 ---
 
@@ -709,3 +754,5 @@ Antes de considerar un componente de página terminado, verificar:
 - [ ] Campos numéricos inicializados en `null` (no `0`)
 - [ ] No hay `<p-toast />` ni `providers: [MessageService]` en el componente
 - [ ] No hay `style="..."` en divs estructurales
+- [ ] Todo `p-button` sin `label` tiene `pTooltip` descriptivo
+- [ ] `TooltipModule` de `primeng/tooltip` está en el array `imports` del componente
