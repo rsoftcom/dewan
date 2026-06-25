@@ -102,3 +102,61 @@ Response 201:
 `GET /api/v1/movements?cashRegisterId=uuid&type=expense&page=1&limit=50`
 
 Response 200: Wrapper paginado con movimientos.
+
+---
+
+## UC-11-03: Consultar movimientos de cajas históricas
+
+**Actor:** `owner`, `admin`, `cashier`
+**Roles permitidos:** OW, AD, CA
+
+**Descripción:** Permite ver los movimientos de cajas ya cerradas sin necesidad de que haya una caja abierta. El selector de caja en la pantalla de movimientos muestra todas las cajas del tenant (activa + históricas) ordenadas de más reciente a más antigua.
+
+**Flujo principal:**
+
+1. Usuario abre la pantalla de movimientos.
+2. Frontend llama `GET /cash-registers?page=1&limit=50` para cargar el historial de cajas.
+3. Se muestra un dropdown con las cajas ordenadas por fecha DESC. La caja abierta (si existe) aparece primero con el indicador "● Abierta"; las cerradas con "○ Cerrada".
+4. Al seleccionar una caja, el frontend llama:
+   - Si la caja está abierta: `GET /movements?current=true&page=1&limit=20`.
+   - Si la caja está cerrada: `GET /movements?cashRegisterId=<id>&page=1&limit=20`.
+5. La tabla muestra los movimientos de la caja seleccionada.
+6. El botón "Nuevo movimiento" solo aparece cuando la caja seleccionada está **abierta**. Las cajas cerradas son de solo lectura (se muestra el badge "Solo lectura").
+
+**Reglas de negocio:**
+
+- RN-26: Las cajas cerradas son inmutables. El frontend no permite agregar movimientos a una caja con `status = 'closed'`.
+- El dropdown carga hasta 50 cajas. Para tenants con más historial, se puede extender el `limit`.
+
+**Criterios de aceptación:**
+
+```gherkin
+Scenario: Consultar movimientos de una caja cerrada sin caja abierta
+  Given no hay caja abierta
+  And existe historial de 3 cajas cerradas
+  When el usuario abre la pantalla de movimientos
+  Then ve el dropdown con las 3 cajas (más reciente seleccionada)
+  And puede navegar entre cajas y ver sus movimientos
+  And el botón "Nuevo movimiento" no aparece
+
+Scenario: Cambiar de caja activa a histórica
+  Given hay una caja abierta (seleccionada por defecto)
+  When el usuario selecciona una caja cerrada del dropdown
+  Then la tabla muestra los movimientos de esa caja
+  And aparece el badge "Solo lectura"
+  And desaparece el botón "Nuevo movimiento"
+```
+
+**Nuevo endpoint backend (UC-10-04):**
+
+`GET /api/v1/cash-registers?page=1&limit=50`
+
+Response 200: Wrapper paginado de cajas, ordenadas por `openedAt DESC`.
+
+**Archivos afectados:**
+
+- `dewan-backend/modules/cash-registers/cash-registers.service.ts` — nuevo método `findAll()`
+- `dewan-backend/modules/cash-registers/cash-registers.controller.ts` — nuevo `@Get()`
+- `dewan-frontend/features/cash-registers/services/cash-registers.service.ts` — nuevo método `findAll()`
+- `dewan-frontend/features/cash-registers/models/cash-register.model.ts` — nuevo tipo `CashRegisterListResponse`
+- `dewan-frontend/features/movements/pages/movement-list.component.ts` — selector de caja, lógica de historial

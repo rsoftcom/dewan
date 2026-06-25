@@ -55,7 +55,8 @@
 |                    |PATCH |`/kitchen/orders/:id/ready`         |KI, OW, AD    |
 |                    |PATCH |`/kitchen/orders/:id/reject`        |KI, OW, AD    |
 |**Payments**        |POST  |`/orders/:id/payments`              |OW, AD, CA    |
-|**Cash Register**   |POST  |`/cash-registers`                   |OW, AD, CA    |
+|**Cash Register**   |GET   |`/cash-registers`                   |OW, AD, CA    |
+|                    |POST  |`/cash-registers`                   |OW, AD, CA    |
 |                    |GET   |`/cash-registers/current`           |OW, AD, CA    |
 |                    |PATCH |`/cash-registers/current/close`     |OW, AD, CA    |
 |**Movements**       |POST  |`/movements`                        |OW, AD, CA    |

@@ -288,6 +288,8 @@
       "order": 7,
       "dependencies": [],
       "completedAt": "2026-05-24",
+      "updatedAt": "2026-06-24",
+      "notes": "2026-06-24: UC-10-04 añadido — GET /cash-registers lista todas las cajas paginado (requerido por UC-11-03).",
       "files": [
         "dewan-backend/prisma/schema.prisma",
         "dewan-backend/modules/cash-registers/cash-registers.module.ts",
@@ -313,6 +315,8 @@
         "SPEC-10-cash-register"
       ],
       "completedAt": "2026-05-24",
+      "updatedAt": "2026-06-24",
+      "notes": "2026-06-24: UC-11-03 añadido — consulta de movimientos históricos. Nuevo endpoint GET /cash-registers en backend (UC-10-04). Frontend: selector de caja en movement-list muestra historial de cajas; solo lectura para cajas cerradas.",
       "files": [
         "dewan-backend/prisma/schema.prisma",
         "dewan-backend/modules/movements/movements.module.ts",
