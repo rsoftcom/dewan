@@ -2,7 +2,7 @@
   "project": "dewan",
   "version": "1.0",
   "createdAt": "2026-05-20",
-  "updatedAt": "2026-06-26",
+  "updatedAt": "2026-06-27",
   "phase": "phase2",
   "summary": "Fase 1 completa (19 módulos). Fase 2: SPEC-20, SPEC-21, SPEC-22, SPEC-24 completados. SPEC-22: todos los ítems de código implementados + tests. SPEC-24: SEO (meta OG, SeoService, robots.txt, sitemap, JSON-LD) + búsqueda (iconfield con × adaptativo en products/customers/users).",
   "prisma": {
@@ -789,11 +789,11 @@
         "PERF-06-on-push": "done",
         "PERF-07-fonts": "done",
         "PERF-08-images": "done",
-        "PERF-09-nginx-cloudflare": "pending",
+        "PERF-09-nginx-cloudflare": "done",
         "PERF-10-websocket-singleton": "done",
         "PERF-11-dashboard-lcp-skeleton": "done"
       },
-      "notes": "PERF-09 (Nginx/Cloudflare headers) requires infra config changes, not code — documented in SPEC-22 spec. PERF-10 done via SPEC-20. PERF-11 done: skeleton loader cards replace 'Cargando...' text in dashboard — renders 3 opaque cards immediately to satisfy LCP before API responds.",
+      "notes": "PERF-09 (Nginx/Cloudflare headers) applied 2026-06-27. PERF-10 done via SPEC-20. PERF-11 done: skeleton loader cards replace 'Cargando...' text in dashboard — renders 3 opaque cards immediately to satisfy LCP before API responds.",
       "files": [
         "dewan-backend/main.ts",
         "dewan-backend/modules/units/units.controller.ts",
