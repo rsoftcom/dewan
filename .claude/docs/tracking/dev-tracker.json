@@ -4,7 +4,7 @@
   "createdAt": "2026-05-20",
   "updatedAt": "2026-06-26",
   "phase": "phase2",
-  "summary": "Fase 1 completa (19 módulos). Fase 2: SPEC-20 (WebSocket), SPEC-21 (multi-tenant owner) y SPEC-22 (performance) completados. Pendiente: PERF-09 (Nginx/Cloudflare config, infra).",
+  "summary": "Fase 1 completa (19 módulos). Fase 2: SPEC-20, SPEC-21, SPEC-22, SPEC-24 completados. SPEC-22: todos los ítems de código implementados + tests. SPEC-24: SEO (meta OG, SeoService, robots.txt, sitemap, JSON-LD) + búsqueda (iconfield con × adaptativo en products/customers/users).",
   "prisma": {
     "initialized": true,
     "schemaPath": "dewan-backend/prisma/schema.prisma"
@@ -734,15 +734,50 @@
         "dewan-frontend/features/dashboard/services/dashboard.service.ts"
       ]
     },
+    "SPEC-24-seo-search": {
+      "status": "done",
+      "backend": "n/a",
+      "frontend": "done",
+      "tests": "n/a",
+      "order": 24,
+      "phase": 2,
+      "priority": 2,
+      "completedAt": "2026-06-26",
+      "dependencies": [],
+      "specFile": ".claude/docs/specs/SPEC-24-seo-search.md",
+      "items": {
+        "SEO-01-meta-tags": "done",
+        "SEO-02-seo-service": "done",
+        "SEO-03-route-data": "done",
+        "SEO-04-robots-sitemap": "done",
+        "SEO-05-json-ld": "done",
+        "SEO-06-canonical": "done",
+        "SRCH-01-search-icon": "done",
+        "SRCH-02-clear-button": "done"
+      },
+      "notes": "og:image (assets/og-image.png 1200x630) y apple-touch-icon (assets/icons/apple-touch-icon.png) referenciados en index.html pero deben crearse/subirse por separado.",
+      "files": [
+        "dewan-frontend/index.html",
+        "dewan-frontend/app/app.config.ts",
+        "dewan-frontend/app/app.routes.ts",
+        "dewan-frontend/core/services/seo.service.ts",
+        "dewan-frontend/public/robots.txt",
+        "dewan-frontend/public/sitemap.xml",
+        "dewan-frontend/features/products/pages/product-list.component.ts",
+        "dewan-frontend/features/customers/pages/customer-list.component.ts",
+        "dewan-frontend/features/users/pages/user-list.component.ts"
+      ]
+    },
     "SPEC-22-performance": {
       "status": "done",
       "backend": "done",
       "frontend": "done",
-      "tests": "pending",
+      "tests": "done",
       "order": 22,
       "phase": 2,
       "priority": 1,
       "completedAt": "2026-06-26",
+      "updatedAt": "2026-06-26",
       "dependencies": [],
       "specFile": ".claude/docs/specs/SPEC-22-performance.md",
       "items": {
@@ -755,9 +790,10 @@
         "PERF-07-fonts": "done",
         "PERF-08-images": "done",
         "PERF-09-nginx-cloudflare": "pending",
-        "PERF-10-websocket-singleton": "done"
+        "PERF-10-websocket-singleton": "done",
+        "PERF-11-dashboard-lcp-skeleton": "done"
       },
-      "notes": "PERF-09 (Nginx/Cloudflare headers) requires infra config changes, not code — documented in SPEC-22 spec. PERF-10 done via SPEC-20. All code items implemented.",
+      "notes": "PERF-09 (Nginx/Cloudflare headers) requires infra config changes, not code — documented in SPEC-22 spec. PERF-10 done via SPEC-20. PERF-11 done: skeleton loader cards replace 'Cargando...' text in dashboard — renders 3 opaque cards immediately to satisfy LCP before API responds.",
       "files": [
         "dewan-backend/main.ts",
         "dewan-backend/modules/units/units.controller.ts",
@@ -766,13 +802,17 @@
         "dewan-backend/modules/kitchen/kitchen.service.ts",
         "dewan-backend/prisma/schema.prisma",
         "dewan-backend/prisma/migrations/20260626000001_perf_compound_indexes/migration.sql",
+        "dewan-backend/common/tests/performance.spec.ts",
         "dewan-frontend/app/app.routes.ts",
         "dewan-frontend/app/shell/shell.component.ts",
+        "dewan-frontend/tsconfig.app.json",
         "dewan-frontend/index.html",
         "dewan-frontend/styles.scss",
         "dewan-frontend/public/assets/fonts/inter-v20-latin.woff2",
         "dewan-frontend/public/assets/fonts/outfit-v15-latin.woff2",
-        "dewan-frontend/features/auth/pages/login.component.ts"
+        "dewan-frontend/features/auth/pages/login.component.ts",
+        "dewan-frontend/features/dashboard/pages/dashboard.component.ts",
+        "dewan-frontend/features/dashboard/pages/dashboard.component.spec.ts"
       ]
     }
   }

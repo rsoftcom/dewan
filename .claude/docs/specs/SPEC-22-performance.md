@@ -24,6 +24,35 @@ Medidas con Lighthouse en modo "Slow 4G" (simulación de 3G+ real) sobre una car
 
 ---
 
+## Baseline medido — Lighthouse 2026-06-27
+
+Medición sobre `http://localhost:4200/dashboard` en modo **navegación** (gatherMode: navigation), Chrome 148, MacBook Pro (benchmarkIndex 2910 → hardware rápido). **Nota:** local ≠ producción; red y CPU de usuario real serán peores.
+
+| Métrica | Valor medido | Objetivo | Estado |
+|---|---|---|---|
+| First Contentful Paint (FCP) | **2.3 s** (score 0.18) | < 1.6 s | ❌ Muy mal |
+| Largest Contentful Paint (LCP) | **3.9 s** (score 0.18) | < 2.5 s | ❌ Muy mal |
+| Speed Index | **2.3 s** (score 0.48) | < 1.3 s | ⚠️ Mejorable |
+| Total Blocking Time | datos truncados | < 300 ms | — |
+| CLS | datos truncados | < 0.1 | — |
+| Puntuación Performance | no disponible | ≥ 85 | — |
+
+> El reporte fue truncado antes de las secciones Opportunities/Diagnostics. Si hay datos adicionales (TBT, CLS, auditorías de oportunidades), añadirlos aquí para completar el cuadro.
+
+### Lo que revela el filmstrip
+
+El filmstrip muestra **pantalla en blanco desde 375 ms hasta ~2 250 ms** (6 fotogramas consecutivos completamente vacíos). Esto es diagnóstico de un problema de **render-blocking**: el navegador no puede pintar nada hasta que el bundle JS principal descarga y ejecuta, o hasta que las fuentes bloquean el Critical Rendering Path.
+
+Patrones inferidos:
+
+| Observación | Causa probable | Fix |
+|---|---|---|
+| Pantalla en blanco hasta FCP (2.3 s) | Bundle inicial grande / sin code-splitting efectivo o fuentes bloqueantes | PERF-05 (lazy routes) + PERF-07 (fuentes) |
+| Gap FCP → LCP de 1.6 s | El elemento LCP (probablemente una gráfica del dashboard o imagen) depende de una llamada API que tarda | PERF-11 (skeleton + deferred API calls) |
+| FCP y LCP con score 0.18 en hardware rápido local | Si esto ocurre en localhost sin throttling, en producción 4G los scores serán < 0.1 | Alta prioridad inmediata |
+
+---
+
 ## Diagnóstico del estado actual
 
 ### Frontend
@@ -238,6 +267,42 @@ Cloudflare Pages sirve automáticamente con `Cache-Control: public, max-age=0, m
 
 ---
 
+## PERF-11: Reducir LCP del dashboard (gap FCP → LCP)
+
+**Impacto:** Alto — el baseline muestra 1.6 s entre FCP y LCP. El elemento LCP del dashboard es probablemente una gráfica (Chart.js) o un widget de estadísticas que espera respuesta de API antes de renderizar.
+
+**Diagnóstico:** Confirmar qué elemento es el LCP con DevTools → Performance → LCP:
+
+```
+DevTools → Abrir dashboard → F12 → Performance → Record → Reload → Stop
+Buscar el marcador "LCP" en el timeline y ver qué elemento lo dispara.
+```
+
+**Acciones según elemento LCP:**
+
+1. **Si es una gráfica de Chart.js:** diferir la importación de `chart.js` con lazy import dentro del componente, o usar `@defer` (Angular 17+) para que el widget cargue tras el paint inicial.
+
+   ```typescript
+   // En el dashboard component
+   @Component({ template: `@defer { <app-sales-chart /> }` })
+   ```
+
+2. **Si es texto de estadísticas (total de ventas, etc.):** mostrar un skeleton loader inmediatamente y cargar el dato en segundo plano. El skeleton satisface al LCP browser tracker siempre que sea visible y opaco.
+
+3. **Si es una imagen (logo de tenant):** aplicar `loading="eager"` + `fetchpriority="high"` en el `<img>` LCP. Añadir `<link rel="preload" as="image">` en el `<head>`.
+
+**Criterio de aceptación:**
+
+```gherkin
+Scenario: LCP del dashboard ≤ 2.5 s en localhost sin throttling
+  Given la app construida en modo producción local (ng build --configuration production)
+  When se corre Lighthouse sobre http://localhost:4200/dashboard
+  Then el LCP es ≤ 2.5 s
+  And el score de LCP es ≥ 0.5
+```
+
+---
+
 ## PERF-10: Eliminar WebSocket polling — completado por SPEC-20
 
 La migración a `WebSocketService` singleton (SPEC-20) elimina el principal patrón de tráfico innecesario. Impacto directo:
@@ -283,18 +348,31 @@ ORDER BY created_at ASC;
 
 ---
 
-## Orden de implementación sugerido (mayor impacto primero)
+## Orden de implementación sugerido (revisado con baseline 2026-06-27)
 
-| Prioridad | Item | Esfuerzo | Impacto |
-|---|---|---|---|
-| 1 | PERF-01: Compresión gzip (backend) | 30 min | Alto |
-| 2 | PERF-05: Lazy loading completo | 1–2 h | Alto |
-| 3 | PERF-03: Índices DB | 1 h | Alto |
-| 4 | PERF-07: Autohosting fuentes | 1 h | Medio |
-| 5 | PERF-06: ChangeDetection.OnPush | 1–2 h | Medio |
-| 6 | PERF-09: Cloudflare/Nginx headers | 30 min | Medio |
-| 7 | PERF-02: Cache-Control API | 1 h | Medio |
-| 8 | PERF-04: Select fields Prisma | 2–3 h | Bajo-Medio |
-| 9 | PERF-08: Imágenes lazy | 1 h | Bajo-Medio |
+El baseline Lighthouse confirma que FCP y LCP son el cuello de botella principal. Los primeros tres ítems atacan directamente el tiempo de blank screen (2.3 s) y el gap FCP→LCP (1.6 s).
+
+| Prioridad | Item | Esfuerzo | Impacto | Métrica afectada |
+|---|---|---|---|---|
+| 🔴 1 | PERF-05: Lazy loading completo | 1–2 h | Alto | FCP ↓, LCP ↓ |
+| 🔴 2 | PERF-07: Autohosting fuentes | 1 h | Alto | FCP ↓ (elimina render-block) |
+| 🔴 3 | PERF-11: Reducir LCP dashboard | 1–2 h | Alto | LCP ↓ |
+| 🟠 4 | PERF-01: Compresión gzip (backend) | 30 min | Alto | TTI ↓, LCP ↓ |
+| 🟠 5 | PERF-06: ChangeDetection.OnPush | 1–2 h | Medio | TBT ↓, INP ↓ |
+| 🟡 6 | PERF-03: Índices DB | 1 h | Alto | API P95 ↓ |
+| 🟡 7 | PERF-09: Cloudflare/Nginx headers | 30 min | Medio | Retorno usuarios |
+| 🟡 8 | PERF-02: Cache-Control API | 1 h | Medio | API P95 ↓ |
+| ⚪ 9 | PERF-04: Select fields Prisma | 2–3 h | Bajo-Medio | Payload ↓ |
+| ⚪ 10 | PERF-08: Imágenes lazy | 1 h | Bajo-Medio | CLS ↓ |
+
+### Criterio de "done" para esta fase
+
+Correr Lighthouse sobre **build de producción** (`ng build --configuration production`) en localhost (sin throttling) y obtener:
+
+- LCP ≤ 2.5 s
+- FCP ≤ 1.6 s
+- Puntuación Performance ≥ 70 (sin throttling en hardware local)
+
+Con throttling simulado 4G (parámetro `--throttling-method=simulate`) los objetivos son los de la tabla de Métricas objetivo.
 
 > SPEC-20 (WebSocket singleton) y las migraciones de SPEC-21 (multi-tenant) son requisitos previos que también mejoran el rendimiento de red.
