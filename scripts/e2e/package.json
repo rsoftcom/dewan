@@ -1,0 +1,16 @@
+{
+  "name": "dewan-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "smoke": "playwright test tests/smoke.spec.ts --reporter=list",
+    "check-503": "playwright test tests/check-503.spec.ts --reporter=list",
+    "orders": "playwright test tests/orders.spec.ts --reporter=list",
+    "install:browsers": "playwright install chromium --with-deps"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.45.0",
+    "typescript": "^5.5.0"
+  }
+}
