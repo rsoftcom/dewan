@@ -2,9 +2,9 @@
   "project": "dewan",
   "version": "1.0",
   "createdAt": "2026-05-20",
-  "updatedAt": "2026-06-24",
+  "updatedAt": "2026-06-26",
   "phase": "phase2",
-  "summary": "Fase 1 completa (19 módulos). Fase 2: SPEC-20 (WebSocket) y SPEC-21 (multi-tenant owner) completados 2026-06-23. Pendiente: SPEC-22 (performance).",
+  "summary": "Fase 1 completa (19 módulos). Fase 2: SPEC-20 (WebSocket), SPEC-21 (multi-tenant owner) y SPEC-22 (performance) completados. Pendiente: PERF-09 (Nginx/Cloudflare config, infra).",
   "prisma": {
     "initialized": true,
     "schemaPath": "dewan-backend/prisma/schema.prisma"
@@ -735,37 +735,44 @@
       ]
     },
     "SPEC-22-performance": {
-      "status": "pending",
-      "backend": "pending",
-      "frontend": "pending",
+      "status": "done",
+      "backend": "done",
+      "frontend": "done",
       "tests": "pending",
       "order": 22,
       "phase": 2,
       "priority": 1,
+      "completedAt": "2026-06-26",
       "dependencies": [],
       "specFile": ".claude/docs/specs/SPEC-22-performance.md",
       "items": {
-        "PERF-01-compression": "pending",
-        "PERF-02-cache-control": "pending",
-        "PERF-03-db-indexes": "pending",
-        "PERF-04-prisma-select": "pending",
-        "PERF-05-lazy-routes": "pending",
-        "PERF-06-on-push": "pending",
-        "PERF-07-fonts": "pending",
-        "PERF-08-images": "pending",
+        "PERF-01-compression": "done",
+        "PERF-02-cache-control": "done",
+        "PERF-03-db-indexes": "done",
+        "PERF-04-prisma-select": "done",
+        "PERF-05-lazy-routes": "done",
+        "PERF-06-on-push": "done",
+        "PERF-07-fonts": "done",
+        "PERF-08-images": "done",
         "PERF-09-nginx-cloudflare": "pending",
-        "PERF-10-websocket-singleton": "blocked-by-SPEC-20"
+        "PERF-10-websocket-singleton": "done"
       },
+      "notes": "PERF-09 (Nginx/Cloudflare headers) requires infra config changes, not code — documented in SPEC-22 spec. PERF-10 done via SPEC-20. All code items implemented.",
       "files": [
         "dewan-backend/main.ts",
         "dewan-backend/modules/units/units.controller.ts",
         "dewan-backend/modules/categories/categories.controller.ts",
         "dewan-backend/modules/products/products.controller.ts",
+        "dewan-backend/modules/kitchen/kitchen.service.ts",
         "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/prisma/migrations/20260626000001_perf_compound_indexes/migration.sql",
         "dewan-frontend/app/app.routes.ts",
+        "dewan-frontend/app/shell/shell.component.ts",
         "dewan-frontend/index.html",
         "dewan-frontend/styles.scss",
-        "dewan-frontend/public/assets/fonts/"
+        "dewan-frontend/public/assets/fonts/inter-v20-latin.woff2",
+        "dewan-frontend/public/assets/fonts/outfit-v15-latin.woff2",
+        "dewan-frontend/features/auth/pages/login.component.ts"
       ]
     }
   }
