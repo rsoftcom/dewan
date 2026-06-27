@@ -42,12 +42,14 @@ test('detectar errores 503 / 5xx durante navegación y reloads', async ({ page }
     }
   });
 
-  // También capturar errores de red (CORS/ERR_FAILED = status 0 desde Angular)
+  // Capturar errores de red reales — excluir ERR_ABORTED que son cancelaciones del browser
+  // al navegar entre páginas (falsos positivos del redirect de login)
   page.on('requestfailed', request => {
     const url = request.url();
-    if (url.includes('/v1/')) {
+    const error = request.failure()?.errorText ?? '';
+    if (url.includes('/v1/') && !error.includes('ERR_ABORTED')) {
       errors.push({ page: 'navegando', url, status: 0, at: new Date().toISOString() });
-      console.log(`  ❌ ERR_FAILED → ${url} (${request.failure()?.errorText})`);
+      console.log(`  ❌ ERR_FAILED → ${url} (${error})`);
     }
   });
 

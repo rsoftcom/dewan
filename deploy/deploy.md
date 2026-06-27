@@ -318,7 +318,7 @@ npx prisma migrate deploy
 **Iniciar con PM2:**
 
 ```bash
-pm2 start dist/main.js --name dewan-api
+pm2 start ecosystem.config.js
 pm2 save
 pm2 status
 ```
@@ -392,7 +392,7 @@ server {
     ssl_ciphers HIGH:!aNULL:!MD5;
 
     # Rate limiting
-    limit_req zone=api burst=10 nodelay;
+    limit_req zone=api burst=60 nodelay;
 
     location / {
         proxy_pass http://nestjs;
@@ -431,7 +431,7 @@ sudo nano /etc/nginx/nginx.conf
 Dentro del bloque `http { }` agregar:
 
 ```nginx
-limit_req_zone $binary_remote_addr zone=api:10m rate=30r/m;
+limit_req_zone $binary_remote_addr zone=api:10m rate=600r/m;
 limit_req_zone $binary_remote_addr zone=login:10m rate=5r/m;
 client_max_body_size 10m;
 ```

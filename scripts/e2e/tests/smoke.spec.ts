@@ -13,28 +13,28 @@ test.describe('Smoke — navegación básica', () => {
   test('dashboard carga correctamente', async ({ page }) => {
     await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');
-    await expect(page.locator('h1, .page-title')).toBeVisible();
+    await expect(page.locator('.page-title').first()).toBeVisible();
   });
 
   test('listado de órdenes', async ({ page }) => {
     await page.goto('/orders');
     await page.waitForLoadState('networkidle');
     await expect(page).not.toHaveURL(/login/);
-    await expect(page.locator('p-table, .ten-card, h1')).toBeVisible();
+    await expect(page.locator('p-table, .ten-card, h1').first()).toBeVisible();
   });
 
   test('listado de productos', async ({ page }) => {
     await page.goto('/products');
     await page.waitForLoadState('networkidle');
     await expect(page).not.toHaveURL(/login/);
-    await expect(page.locator('p-table, .ten-card, h1')).toBeVisible();
+    await expect(page.locator('p-table, .ten-card, h1').first()).toBeVisible();
   });
 
   test('listado de clientes', async ({ page }) => {
     await page.goto('/customers');
     await page.waitForLoadState('networkidle');
     await expect(page).not.toHaveURL(/login/);
-    await expect(page.locator('p-table, .ten-card, h1')).toBeVisible();
+    await expect(page.locator('p-table, .ten-card, h1').first()).toBeVisible();
   });
 
   test('caja registradora', async ({ page }) => {
