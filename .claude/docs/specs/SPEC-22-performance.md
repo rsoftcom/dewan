@@ -303,6 +303,52 @@ Scenario: LCP del dashboard ≤ 2.5 s en localhost sin throttling
 
 ---
 
+## PERF-12: Preloading por rol (frontend) — implementado 2026-06-26
+
+**Impacto:** Alto — elimina el delay de navegación entre páginas para usuarios autenticados.
+
+**Problema:** Las rutas lazy solo descargaban su chunk JS en el momento de la navegación, causando
+un delay perceptible de ~300–800 ms en producción (especialmente en 3G).
+
+**Solución implementada:** `RoleBasedPreloadingStrategy` en
+`core/routing/role-preloading.strategy.ts`. Implementa `PreloadingStrategy` de Angular:
+
+- Tras el bootstrap, Angular invoca `preload()` para cada ruta lazy en segundo plano.
+- Si la ruta tiene `data.preloadRoles` → precarga solo si el rol del usuario está en esa lista.
+- Si la ruta **no** tiene `data.preloadRoles` (p.ej. `/notifications`, `/profile`) → precarga
+  siempre (accesible para cualquier rol autenticado).
+
+**Archivos modificados:**
+
+| Archivo | Cambio |
+|---|---|
+| `core/routing/role-preloading.strategy.ts` | Nuevo — estrategia de preloading |
+| `app/app.routes.ts` | Añadido `preloadRoles: [...]` en `data` de cada ruta con `roleGuard` |
+| `app/app.config.ts` | Añadido `withPreloading(RoleBasedPreloadingStrategy)` en `provideRouter` |
+
+**Comportamiento por rol:**
+
+| Rol | Chunks que se precargan |
+|---|---|
+| `owner` / `admin` | Todos los features (dashboard, orders, kitchen, reports, etc.) |
+| `cashier` | cash-register, orders, tables, movements, customers, notifications, profile |
+| `waiter` | orders, tables, notifications, profile |
+| `kitchen` | kitchen, notifications, profile |
+| `delivery` | delivery, notifications, profile |
+| `super_admin` | tenants, units, audit-logs, notifications, profile |
+
+**Criterio de aceptación:**
+
+```gherkin
+Scenario: Navegación sin delay tras login
+  Given usuario logueado con rol owner
+  When el shell carga y la app queda idle
+  Then los chunks de los 19 features del rol se han descargado en background
+  And al hacer click en cualquier ítem del menú la navegación es instantánea (<50 ms)
+```
+
+---
+
 ## PERF-10: Eliminar WebSocket polling — completado por SPEC-20
 
 La migración a `WebSocketService` singleton (SPEC-20) elimina el principal patrón de tráfico innecesario. Impacto directo:
@@ -352,18 +398,19 @@ ORDER BY created_at ASC;
 
 El baseline Lighthouse confirma que FCP y LCP son el cuello de botella principal. Los primeros tres ítems atacan directamente el tiempo de blank screen (2.3 s) y el gap FCP→LCP (1.6 s).
 
-| Prioridad | Item | Esfuerzo | Impacto | Métrica afectada |
-|---|---|---|---|---|
-| 🔴 1 | PERF-05: Lazy loading completo | 1–2 h | Alto | FCP ↓, LCP ↓ |
-| 🔴 2 | PERF-07: Autohosting fuentes | 1 h | Alto | FCP ↓ (elimina render-block) |
-| 🔴 3 | PERF-11: Reducir LCP dashboard | 1–2 h | Alto | LCP ↓ |
-| 🟠 4 | PERF-01: Compresión gzip (backend) | 30 min | Alto | TTI ↓, LCP ↓ |
-| 🟠 5 | PERF-06: ChangeDetection.OnPush | 1–2 h | Medio | TBT ↓, INP ↓ |
-| 🟡 6 | PERF-03: Índices DB | 1 h | Alto | API P95 ↓ |
-| 🟡 7 | PERF-09: Cloudflare/Nginx headers | 30 min | Medio | Retorno usuarios |
-| 🟡 8 | PERF-02: Cache-Control API | 1 h | Medio | API P95 ↓ |
-| ⚪ 9 | PERF-04: Select fields Prisma | 2–3 h | Bajo-Medio | Payload ↓ |
-| ⚪ 10 | PERF-08: Imágenes lazy | 1 h | Bajo-Medio | CLS ↓ |
+| Prioridad | Item | Esfuerzo | Impacto | Métrica afectada | Estado |
+|---|---|---|---|---|---|
+| ✅ — | PERF-12: Preloading por rol | 1 h | Alto | Navegación instantánea | **Hecho 2026-06-26** |
+| 🔴 1 | PERF-05: Lazy loading completo | 1–2 h | Alto | FCP ↓, LCP ↓ | Pendiente |
+| 🔴 2 | PERF-07: Autohosting fuentes | 1 h | Alto | FCP ↓ (elimina render-block) | Pendiente |
+| 🔴 3 | PERF-11: Reducir LCP dashboard | 1–2 h | Alto | LCP ↓ | Pendiente |
+| 🟠 4 | PERF-01: Compresión gzip (backend) | 30 min | Alto | TTI ↓, LCP ↓ | Pendiente |
+| 🟠 5 | PERF-06: ChangeDetection.OnPush | 1–2 h | Medio | TBT ↓, INP ↓ | Pendiente |
+| 🟡 6 | PERF-03: Índices DB | 1 h | Alto | API P95 ↓ | Pendiente |
+| 🟡 7 | PERF-09: Cloudflare/Nginx headers | 30 min | Medio | Retorno usuarios | Pendiente |
+| 🟡 8 | PERF-02: Cache-Control API | 1 h | Medio | API P95 ↓ | Pendiente |
+| ⚪ 9 | PERF-04: Select fields Prisma | 2–3 h | Bajo-Medio | Payload ↓ | Pendiente |
+| ⚪ 10 | PERF-08: Imágenes lazy | 1 h | Bajo-Medio | CLS ↓ | Pendiente |
 
 ### Criterio de "done" para esta fase
 
