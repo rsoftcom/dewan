@@ -498,9 +498,13 @@ export type OrderStatus =
   | 'in_kitchen'
   | 'prepared'
   | 'served'
+  | 'assigned'         // delivery: entregado a repartidor
+  | 'on_the_way'       // delivery: en camino
+  | 'delivered'        // delivery: entregado al cliente
+  | 'money_collected'  // delivery: efectivo cobrado
   | 'paid'
   | 'completed'
-  | 'cancelled';
+  | 'rejected';        // terminal: pedido rechazado (no 'cancelled')
 ```
 
 #### Reglas de modelos

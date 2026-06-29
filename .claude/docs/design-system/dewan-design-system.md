@@ -16,8 +16,8 @@
 |**Tagline**      |“De una o ya” — gestión de negocios sin complicaciones        |
 |**Empresa**      |R Soft Company                                                |
 |**Público**      |Restaurantes, cafeterías, tiendas, locales comerciales (LATAM)|
-|**Dominio**      |dewan.com                                                     |
-|**App URL**      |app.dewan.com                                                 |
+|**Dominio**      |getdewan.com                                                  |
+|**App URL**      |app.getdewan.com · API: api.getdewan.com                      |
 
 ### 1.1 Logo
 
@@ -79,17 +79,25 @@ El wordmark usa la fuente **Outfit** (weight 800). La primera parte “de” va 
 
 ### 2.4 Colores de estado de pedidos (dominio)
 
-Estos colores son específicos del flujo de pedidos y se mapean a badges (`p-tag`) del aplicativo:
+Estos colores son específicos del flujo de pedidos y se mapean a badges (`p-tag`) del aplicativo.
+El estado terminal de rechazo es `rejected` (no `cancelled`).
 
-|Estado      |Color fondo          |Color texto      |Badge severity|
-|------------|---------------------|-----------------|--------------|
-|`pending`   |`rgba(217,119,6,.1)` |`#D97706`        |`warn`        |
-|`in_kitchen`|`rgba(255,143,94,.1)`|`#FF8F5E`        |custom coral  |
-|`prepared`  |`rgba(37,99,235,.1)` |`#2563EB`        |`info`        |
-|`served`    |`rgba(124,58,237,.1)`|`#7C3AED`        |custom violet |
-|`paid`      |`rgba(22,163,74,.1)` |`#16A34A`        |`success`     |
-|`completed` |`rgba(22,163,74,.08)`|`#16A34A` (opaco)|`success`     |
-|`cancelled` |`rgba(220,38,38,.1)` |`#DC2626`        |`danger`      |
+**Flujo local:** `pending → in_kitchen → prepared → served → paid → completed`
+**Flujo delivery:** `pending → in_kitchen → prepared → assigned → on_the_way → delivered → money_collected → paid → completed`
+
+|Estado           |Color fondo          |Color texto      |Badge severity|Flujo    |
+|-----------------|---------------------|-----------------|--------------|---------|
+|`pending`        |`rgba(217,119,6,.1)` |`#D97706`        |`warn`        |ambos    |
+|`in_kitchen`     |`rgba(255,143,94,.1)`|`#FF8F5E`        |custom coral  |ambos    |
+|`prepared`       |`rgba(37,99,235,.1)` |`#2563EB`        |`info`        |ambos    |
+|`served`         |`rgba(124,58,237,.1)`|`#7C3AED`        |custom violet |local    |
+|`assigned`       |`rgba(37,99,235,.1)` |`#2563EB`        |`info`        |delivery |
+|`on_the_way`     |`rgba(255,143,94,.1)`|`#FF8F5E`        |custom coral  |delivery |
+|`delivered`      |`rgba(124,58,237,.1)`|`#7C3AED`        |custom violet |delivery |
+|`money_collected`|`rgba(217,119,6,.1)` |`#D97706`        |`warn`        |delivery |
+|`paid`           |`rgba(22,163,74,.1)` |`#16A34A`        |`success`     |ambos    |
+|`completed`      |`rgba(22,163,74,.08)`|`#16A34A` (opaco)|`success`     |ambos    |
+|`rejected`       |`rgba(220,38,38,.1)` |`#DC2626`        |`danger`      |ambos    |
 
 ### 2.5 Colores complementarios
 
@@ -626,15 +634,15 @@ Iconos más usados en el aplicativo:
 
 ## 14. Archivos de referencia del proyecto
 
-|Archivo                             |Contenido                                    |
-|------------------------------------|---------------------------------------------|
-|`rsoft-arquitectura.md`             |Stack completo, decisiones de infraestructura|
-|`rsoft-arquitectura-fase3.md`       |Arquitectura actualizada fase 3              |
-|`rsoft-coding-conventions-naming.md`|Convenciones de código y nomenclatura        |
-|`rsoft-entities.md`                 |Modelo de entidades de base de datos         |
-|`rsoft-sdd-specs.md`                |Especificaciones funcionales del sistema     |
-|`rsoft-analisis.md`                 |Análisis de requerimientos                   |
-|**Este archivo**                    |Design system y guía de estilos visual       |
+|Archivo                                        |Contenido                                         |
+|-----------------------------------------------|--------------------------------------------------|
+|`.claude/docs/architecture/architecture-summary.md`|Stack, hosting, módulos, middleware stack (leer primero)|
+|`.claude/docs/conventions/coding-conventions.md`   |Naming, patrones Angular/NestJS, ejemplos         |
+|`.claude/docs/conventions/ui-conventions.md`       |Layout, dialogs, tablas, empty states, PrimeNG    |
+|`.claude/docs/entities/_entity-relationships.md`   |Diagrama ER + notas clave (FK, soft delete, global)|
+|`.claude/docs/specs/_spec-index.md`                |Índice de specs por fase                          |
+|`.claude/docs/tracking/dev-tracker.json`            |Estado vivo por módulo (fuente de verdad)         |
+|**Este archivo**                                   |Design system: tokens, colores, tipografía, layout|
 
 -----
 

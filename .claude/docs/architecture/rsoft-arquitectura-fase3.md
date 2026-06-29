@@ -1,6 +1,26 @@
-# R Soft — Arquitectura Técnica (Fase 3)
+# R Soft — Arquitectura Técnica Fase 3 (documento histórico de planificación)
 
-> **Fase actual:** Fase 3 — Arquitectura técnica
+> ⚠️ **DOCUMENTO HISTÓRICO** — Este archivo describe la evaluación de stacks de la fase de
+> planeación (2026-05-19). El estado actual real está en
+> [`architecture-summary.md`](architecture-summary.md).
+>
+> **Lo que cambió respecto a este plan:**
+> - **Stack A (AWS EC2)** fue reemplazado por **DigitalOcean Droplet** (misma arquitectura, diferente proveedor)
+> - Dominio: `rsoft.com` → **`getdewan.com`** · `api.rsoft.com` → **`api.getdewan.com`**
+> - API prefix: `/api/v1` → **`/v1`**
+> - Cloudflare Pages (frontend): ✅ **implementado** — build `dist/dewan-frontend/browser`
+> - Cloudflare R2 (imágenes): **no implementado** — `@aws-sdk/client-s3` no está instalado
+> - AWS S3 backups: **no implementado en producción**
+> - AWS SES: **no implementado** — email es console.log (MVP)
+> - Logging: Pino → **LoggingInterceptor propio**
+> - WebSocket rooms: `tenant:{id}` → **`kitchen_[id]`, `orders_[id]`, `user_[id]`**
+> - Stack B/C/D: evaluados pero no necesarios — DigitalOcean cubre el caso de uso
+>
+> El valor de este archivo está en el análisis de plataformas (sección 2) y los decision records.
+
+---
+
+> **Fase actual:** Fase 3 — Arquitectura técnica (planificación)
 > **Última actualización:** 2026-05-19
 > **Contexto MVP:** Un solo tenant (1 restaurante), 5-8 usuarios simultáneos
 

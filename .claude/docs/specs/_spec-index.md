@@ -36,13 +36,14 @@
 
 ## Fase 3 — Calidad y operaciones (SPEC-23+)
 
-| File | Module | Items | Afecta |
-|---|---|---|---|
-| SPEC-23-testing.md | Testing y Cobertura | TEST-01 to TEST-09 | Transversal (ambos repos) |
+| File | Module | Items | Afecta | Estado |
+|---|---|---|---|---|
+| SPEC-23-testing.md | Testing y Cobertura | TEST-01 to TEST-09 | Transversal (ambos repos) | en progreso |
+| SPEC-24-seo-search.md | SEO y Búsqueda | — | Frontend transversal | **completado 2026-06-26** |
 
 **Fase 1:** 19 módulos · 57 use cases · 90+ endpoints  
 **Fase 2:** 3 specs transversales · cambios en schema, auth y capa real-time  
-**Fase 3:** calidad de código, testing y operaciones
+**Fase 3:** calidad de código, testing, SEO y operaciones
 
 ## Cambios de fase 2 sobre specs existentes
 

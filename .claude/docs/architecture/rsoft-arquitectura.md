@@ -1,6 +1,25 @@
-# R Soft — Arquitectura Técnica (Fase 3)
+# R Soft — Arquitectura Técnica (documento histórico de planificación)
 
-> **Fase actual:** Fase 3 — Arquitectura técnica
+> ⚠️ **DOCUMENTO HISTÓRICO** — Este archivo describe las decisiones de arquitectura tomadas en la
+> fase de planeación (2026-05-18). El estado actual real está en
+> [`architecture-summary.md`](architecture-summary.md).
+>
+> **Cambios respecto a este documento:**
+> - Hosting: **AWS EC2 → DigitalOcean Droplet s-1vcpu-1gb** (producción real)
+> - Dominio: `rsoft.com` → **`getdewan.com`** (`app.getdewan.com` / `api.getdewan.com`)
+> - API prefix: `/api/v1` → **`/v1`** (sin `/api`)
+> - Logging: Pino → **LoggingInterceptor propio** (no se instaló nestjs-pino)
+> - Email: AWS SES → **console.log** (MVP, pendiente de integrar)
+> - Cloudflare R2 (imágenes) → **no implementado en producción**
+> - AWS S3 (backups) → **no implementado en producción**
+> - Módulos: 19 → **21** (añadidos `owners` + tablas integradas en orders)
+> - WebSocket rooms: patrón `tenant:{id}` → **`kitchen_[id]`, `orders_[id]`, `user_[id]`**
+>
+> El valor de este archivo está en los **decision records** (secciones 9–10), no en los diagramas operacionales.
+
+---
+
+> **Fase actual:** Fase 3 — Arquitectura técnica (planificación)
 > **Última actualización:** 2026-05-18
 > **Contexto MVP:** Un solo tenant (1 restaurante), 5-8 usuarios simultáneos
 

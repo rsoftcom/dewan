@@ -771,7 +771,47 @@ Reglas:
 
 ---
 
-## 9. Restricciones — qué NO hacer
+## 9. Layouts con `position: fixed` en iOS Safari
+
+### 9.1 El problema de `100vh` y `min-height` en sidebars fijos
+
+En iOS Safari, `100vh` se mide usando el **layout viewport** (pantalla completa), mientras que el área visible real es menor porque el browser UI (barra de dirección arriba, barra de navegación abajo ~50px, home indicator ~34px) ocupa espacio. Cuando un elemento usa `position: fixed; top: 0; bottom: 0` — cuya altura debería calcularse del viewport real — y **además** tiene `min-height: 100vh`, el `min-height` gana: el elemento queda más alto que el viewport visible, empujando los hijos hacia abajo y ocultando el footer detrás de la UI del browser.
+
+**Reglas para sidebars y paneles fijos:**
+
+1. **Nunca usar `min-height: 100vh` en un elemento `position: fixed; top: 0; bottom: 0`** — la altura ya está definida por los offsets.
+
+2. **Usar `100dvh`** (dynamic viewport height) en `min-height` para contenedores no fijados (`shell-layout`, `main-area`). `dvh` se actualiza con la UI del browser; soportado desde iOS 15.4+.
+   ```css
+   .shell-layout { min-height: 100dvh; }
+   .main-area    { min-height: 100dvh; }
+   ```
+
+3. **Usar `env(safe-area-inset-bottom)`** en el footer del sidebar para respetar el home indicator de iPhone:
+   ```css
+   .sidebar-footer {
+     padding: 10px;
+     padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+   }
+   ```
+
+4. **`overflow-x: hidden` en lugar de `overflow: hidden`** en el sidebar — `overflow: hidden` en ambos ejes puede bloquear el scroll táctil en iOS Safari de los hijos que tienen `overflow-y: auto`.
+
+5. **Habilitar scroll táctil** en el contenedor de nav con scroll propio:
+   ```css
+   .sidebar-nav {
+     overflow-y: auto;
+     overflow-x: hidden;
+     -webkit-overflow-scrolling: touch;
+     overscroll-behavior: contain;
+   }
+   ```
+
+> `env(safe-area-inset-bottom)` devuelve 0 en Android/escritorio, por lo que es seguro aplicarlo siempre. Requiere `<meta name="viewport" content="viewport-fit=cover">` en el `index.html` para que el valor sea mayor que 0 en iPhone con notch.
+
+---
+
+## 10. Restricciones — qué NO hacer
 
 | Prohibido | Alternativa |
 |---|---|
