@@ -23,6 +23,7 @@
 |---|---|---|---|
 | `audit_log_pkey` | `id` | PRIMARY KEY | |
 | `audit_log_tenant_idx` | `tenant_id` | INDEX | |
+| `audit_log_tenant_created_idx` | `(tenant_id, created_at)` | INDEX | Dashboard date-range queries per tenant |
 | `audit_log_user_idx` | `user_id` | INDEX | |
 | `audit_log_entity_idx` | `(entity, entity_id)` | INDEX | Filter by specific record history |
 | `audit_log_created_at_idx` | `created_at` | INDEX | Date-range filtering |

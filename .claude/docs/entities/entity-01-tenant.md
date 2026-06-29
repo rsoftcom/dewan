@@ -10,6 +10,8 @@
 | `id` | `UUID` | `String` | No | `gen_random_uuid()` | PK | Unique identifier |
 | `name` | `VARCHAR(150)` | `String` | No | — | NOT NULL | Business name |
 | `business_type` | `VARCHAR(50)` | `String?` | Yes | NULL | — | e.g. restaurant, store, cafe |
+| `nit` | `VARCHAR(50)` | `String?` | Yes | NULL | — | Tax identification number |
+| `tax_regime` | `VARCHAR(100)` | `String?` | Yes | NULL | — | Tax regime (e.g. Simplificado, Común) |
 | `logo` | `TEXT` | `String?` | Yes | NULL | — | Public URL (Cloudflare R2) |
 | `address` | `VARCHAR(255)` | `String?` | Yes | NULL | — | Physical address |
 | `phone` | `VARCHAR(30)` | `String?` | Yes | NULL | — | Contact phone |
@@ -37,12 +39,12 @@ TenantStatus: active | inactive
 | Relation | Type | Target | FK | Notes |
 |---|---|---|---|---|
 | `users` | One-to-Many | `user.tenant_id` | — | All users belonging to this tenant |
+| `extra_owners` | One-to-Many | `user_tenant.tenant_id` | — | Multi-tenant ownership junction rows |
 | `products` | One-to-Many | `product.tenant_id` | — | |
 | `categories` | One-to-Many | `category.tenant_id` | — | |
 | `tables` | One-to-Many | `table.tenant_id` | — | |
 | `orders` | One-to-Many | `order.tenant_id` | — | |
 | `customers` | One-to-Many | `customer.tenant_id` | — | |
-| `delivery_persons` | One-to-Many | `delivery_person.tenant_id` | — | |
 | `cash_registers` | One-to-Many | `cash_register.tenant_id` | — | |
 | `movements` | One-to-Many | `movement.tenant_id` | — | |
 | `suppliers` | One-to-Many | `supplier.tenant_id` | — | |

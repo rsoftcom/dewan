@@ -10,21 +10,21 @@
 | `id` | `UUID` | `String` | No | `gen_random_uuid()` | PK | |
 | `tenant_id` | `UUID` | `String` | No | — | FK → `tenant.id` | |
 | `cash_register_id` | `UUID` | `String` | No | — | FK → `cash_register.id` | Must be an open register |
-| `type` | `movement_type` | `MovementType` | No | — | NOT NULL | `income`, `expense`, `cost` |
+| `type` | `movement_type` | `MovementType` | No | — | NOT NULL | `income`, `expense`, `cost`, `sales` |
 | `amount` | `NUMERIC(12,2)` | `Decimal` | No | — | NOT NULL, > 0 | |
-| `description` | `TEXT` | `String` | No | — | NOT NULL | Reason for the movement |
+| `description` | `VARCHAR(255)` | `String` | No | — | NOT NULL | Reason for the movement |
 | `reference` | `VARCHAR(100)` | `String?` | Yes | NULL | — | Receipt or voucher reference |
-| `created_by` | `UUID` | `String` | No | — | FK → `user.id` | |
 | `created_at` | `TIMESTAMPTZ` | `DateTime` | No | `now()` | NOT NULL | |
 
 ### Enums
 
 ```
-MovementType: income | expense | cost
+MovementType: income | expense | cost | sales
 ```
 - `income` — Non-sale cash inflows (e.g. debt collection, received loan).
 - `expense` — Operational outflows (e.g. supplier payment, petty cash purchase).
 - `cost` — General overhead (e.g. utilities, rent, payroll).
+- `sales` — Auto-generated movement created by the system when a payment is registered for an order.
 
 ### Indexes
 
@@ -40,7 +40,6 @@ MovementType: income | expense | cost
 |---|---|---|
 | `tenant` | Many-to-One | `tenant.id` |
 | `cash_register` | Many-to-One | `cash_register.id` |
-| `created_by_user` | Many-to-One | `user.id` |
 
 ### Notes
 - Movements are immutable once registered. No edit or delete — only new corrective movements.

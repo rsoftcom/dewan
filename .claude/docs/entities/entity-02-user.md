@@ -38,15 +38,15 @@ UserStatus: active | inactive
 | Relation | Type | Target | Notes |
 |---|---|---|---|
 | `tenant` | Many-to-One | `tenant.id` | NULL for `super_admin` |
+| `extra_tenants` | One-to-Many | `user_tenant.user_id` | Additional tenants for multi-tenant ownership |
 | `refresh_tokens` | One-to-Many | `refresh_token.user_id` | Active sessions |
 | `orders_created` | One-to-Many | `order.created_by` | Orders created by this user |
+| `orders_as_delivery` | One-to-Many | `order.delivery_person_id` | Orders where this user is the delivery person (role: delivery) |
 | `payments_registered` | One-to-Many | `payment.registered_by` | |
 | `order_status_changes` | One-to-Many | `order_status_history.changed_by` | |
 | `cash_registers_opened` | One-to-Many | `cash_register.opened_by` | |
 | `cash_registers_closed` | One-to-Many | `cash_register.closed_by` | |
-| `movements_created` | One-to-Many | `movement.created_by` | |
 | `purchases_registered` | One-to-Many | `purchase.registered_by` | |
-| `inventory_adjustments` | One-to-Many | `inventory_adjustment.adjusted_by` | |
 | `notifications` | One-to-Many | `notification.user_id` | Notifications for this user |
 | `audit_logs` | One-to-Many | `audit_log.user_id` | Actions performed by this user |
 

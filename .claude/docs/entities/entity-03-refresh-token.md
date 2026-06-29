@@ -10,6 +10,7 @@
 | `id` | `UUID` | `String` | No | `gen_random_uuid()` | PK | |
 | `user_id` | `UUID` | `String` | No | — | FK → `user.id` ON DELETE CASCADE | Token owner |
 | `token_hash` | `TEXT` | `String` | No | — | NOT NULL, UNIQUE | SHA-256 hash of the raw token |
+| `tenant_id` | `UUID` | `String?` | Yes | NULL | — | Tenant context at token issuance; NULL for `super_admin` |
 | `expires_at` | `TIMESTAMPTZ` | `DateTime` | No | — | NOT NULL | `issued_at + 7 days` |
 | `revoked` | `BOOLEAN` | `Boolean` | No | `false` | NOT NULL | True after use or explicit logout |
 | `created_at` | `TIMESTAMPTZ` | `DateTime` | No | `now()` | NOT NULL | Issuance timestamp |

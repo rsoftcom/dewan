@@ -19,6 +19,7 @@
 | `sale_price` | `NUMERIC(12,2)` | `Decimal?` | Yes | NULL | > 0 when set | Required if `type = prepared` |
 | `purchase_price` | `NUMERIC(12,2)` | `Decimal?` | Yes | NULL | > 0 when set | Unit cost in base unit. Only for `unprepared` |
 | `desired_margin` | `NUMERIC(5,2)` | `Decimal?` | Yes | NULL | 0–100 | Target profit margin %. Only for `prepared` |
+| `sellable` | `BOOLEAN` | `Boolean` | No | `false` | NOT NULL | Whether the product is available for sale in orders |
 | `status` | `product_status` | `ProductStatus` | No | `'active'` | NOT NULL | `active`, `inactive` (soft delete) |
 | `created_at` | `TIMESTAMPTZ` | `DateTime` | No | `now()` | NOT NULL | |
 | `updated_at` | `TIMESTAMPTZ` | `DateTime` | No | `now()` | NOT NULL | |

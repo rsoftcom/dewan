@@ -12,8 +12,7 @@
 | `product_id` | `UUID` | `String` | No | — | FK → `product.id` | Product being adjusted |
 | `type` | `adjustment_type` | `AdjustmentType` | No | — | NOT NULL | `entry`, `exit` |
 | `quantity` | `NUMERIC(12,4)` | `Decimal` | No | — | NOT NULL, > 0 | Quantity in product's base unit |
-| `reason` | `TEXT` | `String` | No | — | NOT NULL | Free-text reason |
-| `adjusted_by` | `UUID` | `String` | No | — | FK → `user.id` | |
+| `reason` | `VARCHAR(255)` | `String` | No | — | NOT NULL | Free-text reason |
 | `created_at` | `TIMESTAMPTZ` | `DateTime` | No | `now()` | NOT NULL | |
 
 ### Enums
@@ -36,7 +35,6 @@ AdjustmentType: entry | exit
 |---|---|---|
 | `tenant` | Many-to-One | `tenant.id` |
 | `product` | Many-to-One | `product.id` |
-| `adjusted_by_user` | Many-to-One | `user.id` |
 
 ### Notes
 - `entry` increases `product.current_stock`; `exit` decreases it.

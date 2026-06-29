@@ -1,39 +1,45 @@
-## 12. `delivery_person`
+## 12. Delivery person (no model — uses `user`)
 
 **Module:** Delivery
-**Description:** Delivery staff records. In MVP they do not have system login; they are operational records only.
+**Description:** There is **no separate `DeliveryPerson` table** in the database. Delivery staff are
+`User` records with `role = 'delivery'`. The `Order` model holds a nullable FK
+`delivery_person_id → user.id` that is populated when the order is assigned to a delivery user.
 
-### Attributes
-
-| Column | PostgreSQL Type | Prisma Type | Nullable | Default | Constraints | Description |
-|--------|----------------|-------------|----------|---------|-------------|-------------|
-| `id` | `UUID` | `String` | No | `gen_random_uuid()` | PK | |
-| `tenant_id` | `UUID` | `String` | No | — | FK → `tenant.id` | |
-| `name` | `VARCHAR(150)` | `String` | No | — | NOT NULL | |
-| `phone` | `VARCHAR(30)` | `String` | No | — | NOT NULL | |
-| `status` | `delivery_person_status` | `DeliveryPersonStatus` | No | `'available'` | NOT NULL | `available`, `on_delivery` |
-| `created_at` | `TIMESTAMPTZ` | `DateTime` | No | `now()` | NOT NULL | |
-
-### Enums
+### How delivery users are identified
 
 ```
-DeliveryPersonStatus: available | on_delivery
+User.role = 'delivery'
 ```
 
-### Indexes
+All users with this role appear in the delivery assignment UI and can be assigned to delivery orders.
 
-| Index | Columns | Type |
-|---|---|---|
-| `delivery_person_pkey` | `id` | PRIMARY KEY |
-| `delivery_person_tenant_idx` | `tenant_id` | INDEX |
+### Relevant fields on related models
 
-### Relationships
+**`order.delivery_person_id`** (`UUID?` FK → `user.id`):
+- NULL until a delivery order is assigned to a user.
+- Set when order transitions from `prepared` → `assigned`.
+- The assigned user must have `role = 'delivery'` and belong to the same tenant.
 
-| Relation | Type | Target | Notes |
-|---|---|---|---|
-| `tenant` | Many-to-One | `tenant.id` | |
-| `orders` | One-to-Many | `order.delivery_person_id` | Orders currently assigned |
+**`user` fields used for delivery context:**
+
+| Field | Description |
+|---|---|
+| `id` | PK used as `order.delivery_person_id` |
+| `name` | Displayed as the delivery person's name |
+| `role` | Must be `delivery` |
+| `status` | `active` to appear as assignable; `inactive` to hide |
+| `tenant_id` | Scoped per tenant |
+
+### Order status flow for delivery orders
+
+```
+pending → in_kitchen → prepared → assigned → on_the_way → delivered → money_collected → completed
+                                  ↑
+                          delivery_person_id set here
+```
 
 ### Notes
-- `status` changes to `on_delivery` when assigned to an order, and back to `available` when the order reaches `money_collected`.
-- Future: will be linked to a `user` with `role = delivery` for app-based tracking.
+- Delivery users **do** have system login credentials (email + password), unlike the old spec
+  that described them as non-login operational records.
+- Filtering active delivery users for assignment: `User.findMany({ where: { tenantId, role: 'delivery', status: 'active' } })`.
+- A delivery user can be assigned to multiple orders simultaneously (no concurrency lock in MVP).

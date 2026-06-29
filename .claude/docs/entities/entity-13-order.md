@@ -13,7 +13,7 @@
 | `status` | `order_status` | `OrderStatus` | No | `'pending'` | NOT NULL | See state machine below |
 | `table_id` | `UUID` | `String?` | Yes | NULL | FK → `table.id` | Required if `type = local` |
 | `customer_id` | `UUID` | `String?` | Yes | NULL | FK → `customer.id` | Required if `type = delivery` |
-| `delivery_person_id` | `UUID` | `String?` | Yes | NULL | FK → `delivery_person.id` | Assigned when leaving kitchen |
+| `delivery_person_id` | `UUID` | `String?` | Yes | NULL | FK → `user.id` | User with `role=delivery` assigned when order reaches `assigned` |
 | `created_by` | `UUID` | `String` | No | — | FK → `user.id` | |
 | `notes` | `TEXT` | `String?` | Yes | NULL | — | General order notes |
 | `rejection_reason` | `TEXT` | `String?` | Yes | NULL | — | Required if `status = rejected` |
@@ -57,7 +57,7 @@ DELIVERY: pending → in_kitchen → prepared → assigned → on_the_way → de
 | `tenant` | Many-to-One | `tenant.id` | |
 | `table` | Many-to-One | `table.id` | NULL for delivery orders |
 | `customer` | Many-to-One | `customer.id` | NULL for local orders |
-| `delivery_person` | Many-to-One | `delivery_person.id` | NULL until assigned |
+| `delivery_person` | Many-to-One | `user.id` | NULL until assigned. Target user must have `role=delivery` |
 | `created_by_user` | Many-to-One | `user.id` | |
 | `order_items` | One-to-Many | `order_item.order_id` | |
 | `status_history` | One-to-Many | `order_status_history.order_id` | |
