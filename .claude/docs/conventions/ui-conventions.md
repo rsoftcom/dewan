@@ -127,7 +127,41 @@ CSS del layout:
 
 ## 3. Empty state
 
-Cuando no hay datos o la funcionalidad está bloqueada (ej: sin caja abierta):
+### 3.1 Dos niveles de empty state
+
+| Situación | Patrón | Dónde aparece |
+|---|---|---|
+| Sin registros en absoluto (primera vez, sin filtros activos) | `.empty-state-card` | A nivel de página, reemplaza la tabla |
+| Sin resultados para una búsqueda/filtro activo | `<ng-template pTemplate="emptymessage">` | Dentro de `<p-table>` |
+
+### 3.2 Estructura de página con empty state
+
+El `.page-header` (con el botón de acción) **siempre visible**. El `@if`/`@else` envuelve la fila de filtros + la card de tabla:
+
+```html
+<!-- Header siempre visible -->
+<div class="page-header">...</div>
+
+@if (!loading() && totalRecords() === 0 && !searchTerm && !statusFilter) {
+  <div class="empty-state-card">...</div>
+} @else {
+  <div class="filter-row">...</div>
+  <div class="mod-card">
+    <p-table>
+      ...
+      <ng-template pTemplate="emptymessage">
+        <tr><td colspan="N" class="tbl-empty">Sin resultados para ese criterio.</td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+}
+```
+
+> Incluir en la condición del `@if` **todos los filtros activos** del componente (searchTerm, statusFilter, roleFilter, dateFrom, dateTo, etc.) para que la card solo aparezca cuando genuinamente no hay datos.
+
+Cuando la acción para crear registros vive en otro módulo (ej: repartidores → usuarios), el CTA usa `severity="secondary"` con `routerLink`.
+
+### 3.3 HTML del empty-state-card
 
 ```html
 <div class="empty-state-card">
@@ -761,7 +795,8 @@ Antes de considerar un componente de página terminado, verificar:
 - [ ] Root es `<div class="page-wrap">` con CSS en scope
 - [ ] Si `.page-wrap` tiene `max-width`, también tiene `margin: 0 auto`
 - [ ] Header usa `.page-header / .page-title / .page-sub`
-- [ ] Empty state usa `.empty-state-card` con `.empty-icon-wrap` tintado en coral
+- [ ] Sin datos reales (sin filtros): usa `.empty-state-card` a nivel de página (envuelve filtros + tabla en `@else`)
+- [ ] Con filtros activos y 0 resultados: usa `<ng-template pTemplate="emptymessage">` dentro de `<p-table>`
 - [ ] Tabla/contenido dentro de `.{mod}-card` (sin `p-card`, sin `shadow-sm`)
 - [ ] Dialogs tienen `[draggable]="false"` y ancho apropiado
 - [ ] Body del dialog es `<div>` simple; campos con `mb-4` excepto el último
