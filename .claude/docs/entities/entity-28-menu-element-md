@@ -1,0 +1,93 @@
+## 28. `menu_element`
+
+**Module:** Public Menu
+**Description:** A single freely-positioned object on a `menu_page` canvas: free text, an image, a decorative shape, or a product card linked live to the product catalog.
+
+### Attributes
+
+| Column | PostgreSQL Type | Prisma Type | Nullable | Default | Constraints | Description |
+|--------|----------------|-------------|----------|---------|-------------|-------------|
+| `id` | `UUID` | `String` | No | `gen_random_uuid()` | PK | |
+| `menu_page_id` | `UUID` | `String` | No | — | FK → `menu_page.id` | |
+| `type` | `menu_element_type` | `MenuElementType` | No | — | NOT NULL | `text`, `image`, `shape`, `product_card` |
+| `x` | `NUMERIC(8,2)` | `Decimal` | No | `0` | NOT NULL | Position, px, relative to page canvas |
+| `y` | `NUMERIC(8,2)` | `Decimal` | No | `0` | NOT NULL | Position, px |
+| `width` | `NUMERIC(8,2)` | `Decimal` | No | — | NOT NULL, > 0 | |
+| `height` | `NUMERIC(8,2)` | `Decimal` | No | — | NOT NULL, > 0 | |
+| `rotation` | `NUMERIC(5,2)` | `Decimal` | No | `0` | NOT NULL | Degrees, -180 to 180 |
+| `z_index` | `INTEGER` | `Int` | No | `0` | NOT NULL | Stacking order within the page |
+| `content` | `JSONB` | `Json?` | Yes | NULL | — | Shape depends on `type` — see Content shapes below |
+| `style` | `JSONB` | `Json?` | Yes | NULL | — | Font, color, border, opacity, alignment — see Style shape below |
+| `product_id` | `UUID` | `String?` | Yes | NULL | FK → `product.id` | Only when `type = product_card`. Live link — name/price/image always read from `product` at render time |
+| `field_config` | `JSONB` | `Json?` | Yes | NULL | — | Only when `type = product_card`. Per-field visibility/style overrides — see below |
+| `created_at` | `TIMESTAMPTZ` | `DateTime` | No | `now()` | NOT NULL | |
+| `updated_at` | `TIMESTAMPTZ` | `DateTime` | No | `now()` | NOT NULL | |
+
+### Enums
+
+```
+MenuElementType: text | image | shape | product_card
+```
+
+### Content shapes (by `type`, stored in `content` jsonb)
+
+| `type` | `content` shape |
+|---|---|
+| `text` | `{ "text": "Bienvenidos a..." }` |
+| `image` | `{ "url": "https://...r2.../uploads/xyz.jpg" }` |
+| `shape` | `{ "kind": "rectangle" \| "circle" \| "line", "fillColor": "#FF6B35" }` |
+| `product_card` | `null` — all card data comes from the live `product` join, not from `content` |
+
+### `style` shape (applies to `text`, `shape`, and per-field overrides inside `product_card`)
+
+```json
+{
+  "fontFamily": "Outfit",
+  "fontSize": 16,
+  "fontWeight": 400,
+  "color": "#1A1028",
+  "backgroundColor": null,
+  "borderRadius": 0,
+  "borderColor": null,
+  "borderWidth": 0,
+  "opacity": 1,
+  "textAlign": "left"
+}
+```
+
+### `field_config` shape (only for `type = product_card`)
+
+```json
+{
+  "showImage": true,
+  "showName": true,
+  "showDescription": false,
+  "showPrice": true,
+  "fieldOrder": ["image", "name", "description", "price"],
+  "fieldStyles": {
+    "name": { "fontSize": 18, "fontWeight": 700 },
+    "price": { "color": "#FF6B35", "fontWeight": 700 }
+  }
+}
+```
+
+### Indexes
+
+| Index | Columns | Type |
+|---|---|---|
+| `menu_element_pkey` | `id` | PRIMARY KEY |
+| `menu_element_menu_page_id_idx` | `menu_page_id` | INDEX |
+| `menu_element_product_id_idx` | `product_id` | INDEX (only non-null rows matter; supports cascading visibility checks) |
+
+### Relationships
+
+| Relation | Type | Target | Notes |
+|---|---|---|---|
+| `menu_page` | Many-to-One | `menu_page.id` | |
+| `product` | Many-to-One | `product.id` | Nullable. Only for `product_card` |
+
+### Notes
+- **Live link rule:** for `type = product_card`, `name`, `sale_price`, `description`, and `image` are **never duplicated** into `menu_element` — they are read from `product` on every render of the public menu. If `product.status = inactive` or `product.sellable = false`, the card is **omitted** from the public render (not shown as empty/broken).
+- If a linked `product` is hard-deleted (should not normally happen — products are soft-deleted per `_entity-conventions.md`), the `menu_element.product_id` FK uses `ON DELETE SET NULL` and the element is treated as an empty `product_card` (hidden in public view, shown as "producto eliminado, vuelve a vincularlo" in the editor).
+- `field_config` only overrides **display**, never price/name values themselves — those always come live from `product`.
+- Hard delete: elements are deleted directly (no soft delete), same rationale as `menu_page`.

@@ -2,9 +2,9 @@
   "project": "dewan",
   "version": "1.0",
   "createdAt": "2026-05-20",
-  "updatedAt": "2026-06-27",
+  "updatedAt": "2026-06-29",
   "phase": "phase2",
-  "summary": "Fase 1 completa (19 módulos). Fase 2: SPEC-20, SPEC-21, SPEC-22, SPEC-24 completados. SPEC-22: todos los ítems de código implementados + tests. SPEC-24: SEO (meta OG, SeoService, robots.txt, sitemap, JSON-LD) + búsqueda (iconfield con × adaptativo en products/customers/users).",
+  "summary": "Fase 1 completa (19 módulos). Fase 2: SPEC-20, SPEC-21, SPEC-22, SPEC-24 completados. SPEC-23 (Testing): in_progress — TEST-01 y TEST-08 hechos. SPEC-25 (Facturación DIAN): spec definido, pendiente PTH. SPEC-26 (Menú canvas + QR): spec + 3 entidades, pendiente impl. SPEC-27 (Offline PWA): spec completo — full offline para owner/admin, Dexie.js + SyncService + Service Worker, tabla sync_operation nueva.",
   "prisma": {
     "initialized": true,
     "schemaPath": "dewan-backend/prisma/schema.prisma"
@@ -95,6 +95,22 @@
     {
       "spec": "SPEC-17-reports",
       "reason": "Last. Reads from all other modules"
+    },
+    {
+      "spec": "SPEC-23-testing",
+      "reason": "Cross-cutting: defines testing strategy and coverage thresholds for both repos"
+    },
+    {
+      "spec": "SPEC-25-electronic-invoicing",
+      "reason": "Depends on: tenants, products, orders, payments, customers"
+    },
+    {
+      "spec": "SPEC-26-menu-qr",
+      "reason": "Depends on: tenants (1:1), products (product_card live link)"
+    },
+    {
+      "spec": "SPEC-27-offline-pwa",
+      "reason": "Cross-cutting: wraps all modules — implement after core modules stable"
     }
   ],
   "modules": {
@@ -766,6 +782,254 @@
         "dewan-frontend/features/products/pages/product-list.component.ts",
         "dewan-frontend/features/customers/pages/customer-list.component.ts",
         "dewan-frontend/features/users/pages/user-list.component.ts"
+      ]
+    },
+    "SPEC-23-testing": {
+      "status": "in_progress",
+      "backend": "partial",
+      "frontend": "partial",
+      "tests": "n/a",
+      "order": 23,
+      "phase": 2,
+      "priority": 2,
+      "completedAt": null,
+      "dependencies": [],
+      "specFile": ".claude/docs/specs/SPEC-23-testing.md",
+      "items": {
+        "TEST-01-collectCoverageFrom": "done",
+        "TEST-02-common-backend-tests": "pending",
+        "TEST-03-e2e-supertest-backend": "pending",
+        "TEST-04-karma-coverage-frontend": "pending",
+        "TEST-05-core-services-frontend": "pending",
+        "TEST-06-components-frontend": "partial",
+        "TEST-07-guards-interceptors-frontend": "pending",
+        "TEST-08-playwright-e2e": "done",
+        "TEST-09-ci-cd-enforcement": "pending"
+      },
+      "notes": "TEST-01 hecho: collectCoverageFrom corregido en backend/package.json. TEST-08 hecho: Playwright en scripts/e2e/ (smoke.spec.ts, orders.spec.ts, check-503.spec.ts). TEST-06 partial: solo dashboard.component.spec.ts existe. Resto pendiente: common/ tests, core/ tests, E2E Supertest, karma coverage, CI test workflow.",
+      "files": [
+        "dewan-backend/package.json",
+        "scripts/e2e/playwright.config.ts",
+        "scripts/e2e/tests/smoke.spec.ts",
+        "scripts/e2e/tests/orders.spec.ts",
+        "scripts/e2e/tests/check-503.spec.ts",
+        "dewan-frontend/features/dashboard/pages/dashboard.component.spec.ts",
+        "dewan-backend/common/guards/tests/roles.guard.spec.ts",
+        "dewan-backend/common/guards/tests/jwt-auth.guard.spec.ts",
+        "dewan-backend/common/interceptors/tests/tenant.interceptor.spec.ts",
+        "dewan-backend/common/interceptors/tests/audit-log.interceptor.spec.ts",
+        "dewan-backend/common/filters/tests/http-exception.filter.spec.ts",
+        "dewan-backend/common/strategies/tests/jwt.strategy.spec.ts",
+        "dewan-backend/common/gateway/tests/events.gateway.spec.ts",
+        "dewan-backend/test/app.e2e-spec.ts",
+        "dewan-backend/test/auth.e2e-spec.ts",
+        "dewan-backend/test/jest-e2e.json",
+        "dewan-frontend/core/auth/auth.service.spec.ts",
+        "dewan-frontend/core/auth/auth.guard.spec.ts",
+        "dewan-frontend/core/auth/jwt.interceptor.spec.ts",
+        "dewan-frontend/core/services/api.service.spec.ts",
+        "dewan-frontend/core/services/websocket.service.spec.ts"
+      ]
+    },
+    "SPEC-25-electronic-invoicing": {
+      "status": "pending",
+      "backend": "pending",
+      "frontend": "pending",
+      "tests": "pending",
+      "order": 25,
+      "phase": 2,
+      "priority": 3,
+      "completedAt": null,
+      "dependencies": [
+        "SPEC-03-tenants",
+        "SPEC-05-products",
+        "SPEC-07-orders",
+        "SPEC-09-payments",
+        "SPEC-12-customers"
+      ],
+      "specFile": ".claude/docs/specs/SPEC-25-electronic-invoicing.md",
+      "schemaChanges": [
+        "Add TaxRegime enum: responsable_iva | no_responsable_iva | gran_contribuyente",
+        "Add DianStatus enum: not_configured | testing | enabled (for fiscal_config)",
+        "Add InvoiceDianStatus enum: pending | validated | rejected",
+        "Add PthProvider enum: factus | siigo | alegra",
+        "Add DocumentType enum: cc | nit | ce | passport",
+        "Add TaxType enum: iva | inc | excluded",
+        "Add TenantFiscalConfig model (tenant_fiscal_config table) — 1:1 optional with Tenant",
+        "Add Invoice model (invoice table) — FK tenant_id, order_id",
+        "Add customer.document_type (nullable enum)",
+        "Add customer.document_number (nullable varchar)",
+        "Add product.tax_type (nullable enum, default excluded)",
+        "Add product.tax_rate (nullable decimal)",
+        "Add order_item.tax_rate_applied (nullable decimal)",
+        "Add order_item.tax_amount (nullable decimal, default 0)",
+        "Add order.subtotal (decimal, default 0)",
+        "Add order.tax_total (decimal, default 0)"
+      ],
+      "useCases": [
+        "UC-25-01: POST /tenant-fiscal-config — configurar datos fiscales (NIT, razón social, PTH)",
+        "UC-25-02: PATCH /tenant-fiscal-config/toggle — activar/desactivar facturación",
+        "UC-25-03: Extender PATCH /products/:id con tax_type y tax_rate",
+        "UC-25-04: Generar factura automáticamente al completar pedido (proceso asíncrono)",
+        "UC-25-05: GET /orders/:id/invoice — consultar estado y descargar PDF de factura"
+      ],
+      "notes": "Opt-in por tenant. Si tenant_fiscal_config no existe o enabled=false, el flujo de pedidos/pagos no cambia en nada. Generación de factura asíncrona (no bloquea el cierre del pedido). Pendiente de decisión: PTH elegido (Factus/Siigo/Alegra), trigger exacto (paid vs completed), manejo de reintentos. Algoritmo DV calculado en backend (módulo 11 DIAN).",
+      "pendingDecisions": [
+        "PTH elegido — define payload exacto, auth y campos obligatorios",
+        "Valores exactos de tax_regime según API del PTH",
+        "Trigger de facturación: ¿al pasar a paid, completed, o botón manual?",
+        "Cantidad de reintentos automáticos antes de intervención manual"
+      ],
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/modules/fiscal-config/fiscal-config.module.ts",
+        "dewan-backend/modules/fiscal-config/fiscal-config.controller.ts",
+        "dewan-backend/modules/fiscal-config/fiscal-config.service.ts",
+        "dewan-backend/modules/fiscal-config/dto/create-fiscal-config.dto.ts",
+        "dewan-backend/modules/fiscal-config/dto/toggle-fiscal-config.dto.ts",
+        "dewan-backend/modules/invoices/invoices.module.ts",
+        "dewan-backend/modules/invoices/invoices.service.ts",
+        "dewan-backend/modules/invoices/invoices.controller.ts",
+        "dewan-backend/modules/invoices/dto/invoice-response.dto.ts",
+        "dewan-backend/modules/invoices/tests/invoices.service.spec.ts",
+        "dewan-frontend/features/fiscal-config/models/fiscal-config.model.ts",
+        "dewan-frontend/features/fiscal-config/services/fiscal-config.service.ts",
+        "dewan-frontend/features/fiscal-config/pages/fiscal-config-form.component.ts",
+        "dewan-frontend/features/invoices/models/invoice.model.ts",
+        "dewan-frontend/features/invoices/services/invoices.service.ts",
+        "dewan-frontend/features/orders/pages/order-detail.component.ts",
+        "dewan-frontend/app/app.routes.ts"
+      ]
+    },
+    "SPEC-26-menu-qr": {
+      "status": "pending",
+      "backend": "pending",
+      "frontend": "pending",
+      "tests": "pending",
+      "order": 26,
+      "phase": 2,
+      "priority": 3,
+      "dependencies": [
+        "SPEC-03-tenants",
+        "SPEC-05-products"
+      ],
+      "specFile": ".claude/docs/specs/SPEC-26-menu-qr.md",
+      "entities": [
+        ".claude/docs/entities/entity-26-menu.md",
+        ".claude/docs/entities/entity-27-menu-page.md",
+        ".claude/docs/entities/entity-28-menu-element-md"
+      ],
+      "schemaChanges": [
+        "Add MenuStatus enum: draft | published",
+        "Add MenuElementType enum: text | image | shape | product_card",
+        "Add Menu model (menu table) — 1:1 with Tenant",
+        "Add MenuPage model (menu_page table) — FK menu_id",
+        "Add MenuElement model (menu_element table) — FK menu_page_id, nullable product_id ON DELETE SET NULL"
+      ],
+      "useCases": [
+        "UC-26-01: GET /menu — lazy-create menu+page on first visit",
+        "UC-26-02: CRUD menu pages (create/rename/reorder/delete)",
+        "UC-26-03: CRUD canvas elements (text/image/shape/product_card, autoguardado debounce)",
+        "UC-26-04: POST /menu/publish — genera slug+QR la primera vez, solo cambia status después",
+        "UC-26-05: GET /public/menu/:slug — vista pública sin auth, product_cards en vivo",
+        "UC-26-06: PATCH /menu/slug — cambia slug y regenera QR (acción explícita y advertida)"
+      ],
+      "notes": "Editor canvas libre (estilo Canva). QR se genera UNA sola vez en el primer publish y no cambia aunque se edite el contenido. Pedidos desde menú público excluidos del scope (fase futura). MVP: 1 menú por tenant.",
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/modules/menu/menu.module.ts",
+        "dewan-backend/modules/menu/menu.controller.ts",
+        "dewan-backend/modules/menu/menu.service.ts",
+        "dewan-backend/modules/menu/dto/create-page.dto.ts",
+        "dewan-backend/modules/menu/dto/update-page.dto.ts",
+        "dewan-backend/modules/menu/dto/reorder-pages.dto.ts",
+        "dewan-backend/modules/menu/dto/create-element.dto.ts",
+        "dewan-backend/modules/menu/dto/update-element.dto.ts",
+        "dewan-backend/modules/menu/dto/update-slug.dto.ts",
+        "dewan-backend/modules/menu/tests/menu.service.spec.ts",
+        "dewan-backend/modules/menu/tests/menu.controller.spec.ts",
+        "dewan-frontend/features/menu/models/menu.model.ts",
+        "dewan-frontend/features/menu/services/menu.service.ts",
+        "dewan-frontend/features/menu/pages/menu-editor.component.ts",
+        "dewan-frontend/features/menu/pages/menu-public.component.ts",
+        "dewan-frontend/features/menu/routes.ts",
+        "dewan-frontend/app/app.routes.ts"
+      ]
+    },
+    "SPEC-27-offline-pwa": {
+      "status": "pending",
+      "backend": "pending",
+      "frontend": "pending",
+      "tests": "pending",
+      "order": 27,
+      "phase": 2,
+      "priority": 3,
+      "completedAt": null,
+      "dependencies": [
+        "SPEC-01-auth",
+        "SPEC-05-products",
+        "SPEC-07-orders",
+        "SPEC-09-payments",
+        "SPEC-10-cash-register",
+        "SPEC-16-inventory"
+      ],
+      "specFile": ".claude/docs/specs/SPEC-27-offline-pwa.md",
+      "roleGate": ["owner", "admin"],
+      "schemaChanges": [
+        "Add SyncOperationStatus enum: processed | conflict | rejected",
+        "Add SyncOperation model (sync_operations table) — idempotency key + audit",
+        "Add CashRegister.offlineLock (nullable string) — UUID of admin holding offline lock"
+      ],
+      "newEndpoints": [
+        "GET /v1/sync/ping — connectivity health check (no auth)",
+        "GET /v1/sync/pull?since=ISO — delta sync of all tenant entities",
+        "POST /v1/sync/push — atomic batch processing of offline operation queue"
+      ],
+      "newFrontendServices": [
+        "core/services/offline.service.ts — state, ping, queue orchestration",
+        "core/services/indexed-db.service.ts — Dexie.js wrapper (all stores)",
+        "core/interceptors/offline.interceptor.ts — bifurcates HTTP to IndexedDB when offline",
+        "core/components/offline-banner.component.ts — status bar with pending count",
+        "core/components/install-prompt.component.ts — PWA install prompt for owner/admin"
+      ],
+      "conflictPolicies": {
+        "create": "always_apply",
+        "order_item_add": "merge",
+        "order_status": "server_wins_if_advanced",
+        "product_update": "last_write_wins_with_notification",
+        "cash_register": "explicit_lock_offlineLock",
+        "payment": "strict_idempotency",
+        "inventory_adjustment": "apply_delta"
+      },
+      "pwa": {
+        "package": "@angular/pwa",
+        "cacheStrategy": "freshness_network_first",
+        "offlineStorage": "Dexie.js IndexedDB",
+        "dataWindowDays": 7,
+        "syncRetryIntervalSecs": 60,
+        "pingIntervalSecs": 30
+      },
+      "estimatedHours": 53,
+      "notes": "Full offline para owner/admin únicamente. Kitchen role no aplica. Menu QR (SPEC-26) no aplica. Reportes offline se computan client-side desde IndexedDB. Cola sobrevive a sesión expirada. Idempotencia por operationId UUID garantiza cero duplicados.",
+      "files": [
+        "dewan-backend/prisma/schema.prisma",
+        "dewan-backend/modules/sync/sync.module.ts",
+        "dewan-backend/modules/sync/sync.controller.ts",
+        "dewan-backend/modules/sync/sync.service.ts",
+        "dewan-backend/modules/sync/dto/push-operations.dto.ts",
+        "dewan-backend/modules/sync/tests/sync.service.spec.ts",
+        "dewan-backend/app.module.ts",
+        "dewan-frontend/ngsw-config.json",
+        "dewan-frontend/public/manifest.webmanifest",
+        "dewan-frontend/public/assets/icons/icon-192x192.png",
+        "dewan-frontend/public/assets/icons/icon-512x512.png",
+        "dewan-frontend/app/app.config.ts",
+        "dewan-frontend/core/services/offline.service.ts",
+        "dewan-frontend/core/services/indexed-db.service.ts",
+        "dewan-frontend/core/interceptors/offline.interceptor.ts",
+        "dewan-frontend/core/components/offline-banner.component.ts",
+        "dewan-frontend/core/components/install-prompt.component.ts",
+        "dewan-frontend/app/shell/shell.component.ts"
       ]
     },
     "SPEC-22-performance": {
